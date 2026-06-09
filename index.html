@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Nezaket Sahibi Akranlar – Dijital Oryantiring</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #4A90D9;
+    --blue-light: #EBF4FF;
+    --blue-mid: #C8E0F8;
+    --green: #52C97C;
+    --green-light: #E6F9EE;
+    --green-dark: #2E9B5C;
+    --orange: #FF8C42;
+    --orange-light: #FFF0E6;
+    --red: #E05B5B;
+    --red-light: #FDEAEA;
+    --bg: #F5F8FF;
+    --white: #FFFFFF;
+    --text: #2D3748;
+    --text-muted: #718096;
+    --border: #D1E3F8;
+    --shadow: 0 4px 20px rgba(74,144,217,0.12);
+    --shadow-lg: 0 8px 32px rgba(74,144,217,0.18);
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── ONBOARDING ── */
+  #screen-onboarding {
+    background: linear-gradient(145deg, #EBF4FF 0%, #E6F9EE 50%, #FFF0E6 100%);
+    padding: 0;
+  }
+
+  .onboard-hero {
+    background: linear-gradient(135deg, var(--blue) 0%, #6BAED6 100%);
+    padding: 40px 24px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .onboard-hero::before {
+    content: '';
+    position: absolute;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    top: -60px; right: -40px;
+  }
+  .onboard-hero::after {
+    content: '';
+    position: absolute;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    bottom: -30px; left: -20px;
+  }
+  .hero-mascot { font-size: 64px; margin-bottom: 12px; position: relative; z-index:1; }
+  .hero-title {
+    font-size: 26px; font-weight: 900; color: white;
+    line-height: 1.2; position: relative; z-index:1;
+  }
+  .hero-sub {
+    font-size: 14px; color: rgba(255,255,255,0.85);
+    margin-top: 8px; position: relative; z-index:1;
+    font-weight: 600;
+  }
+
+  .onboard-form { padding: 24px 20px 40px; }
+  .form-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 24px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .form-card h2 {
+    font-size: 16px; font-weight: 800; color: var(--blue);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .form-card h2 span { font-size: 20px; }
+
+  label {
+    display: block; font-size: 13px; font-weight: 700;
+    color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 600;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, textarea:focus { border-color: var(--blue); background: white; }
+
+  .member-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .member-row input { flex: 1; }
+  .btn-icon {
+    width: 40px; height: 40px;
+    border: none; border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .btn-icon:active { transform: scale(0.92); }
+  .btn-add { background: var(--green-light); color: var(--green-dark); }
+  .btn-remove { background: var(--red-light); color: var(--red); }
+
+  .btn-add-member {
+    width: 100%; padding: 10px;
+    background: var(--green-light);
+    border: 2px dashed var(--green);
+    border-radius: var(--radius-sm);
+    color: var(--green-dark);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; margin-top: 4px;
+    transition: background 0.2s;
+  }
+  .btn-add-member:hover { background: #D0F5E0; }
+
+  .mascot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mascot-card {
+    border: 3px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg);
+  }
+  .mascot-card.selected {
+    border-color: var(--blue);
+    background: var(--blue-light);
+    transform: scale(1.03);
+  }
+  .mascot-card .icon { font-size: 36px; margin-bottom: 6px; }
+  .mascot-card .name { font-size: 12px; font-weight: 800; color: var(--text); }
+  .mascot-card .desc { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+  .btn-primary {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--blue), #6BAED6);
+    border: none; border-radius: var(--radius);
+    color: white; font-family: 'Nunito', sans-serif;
+    font-size: 17px; font-weight: 900;
+    cursor: pointer; letter-spacing: 0.3px;
+    box-shadow: 0 4px 16px rgba(74,144,217,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-primary:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(74,144,217,0.25); }
+  .btn-green {
+    background: linear-gradient(135deg, var(--green), #3DB869);
+    box-shadow: 0 4px 16px rgba(82,201,124,0.35);
+  }
+  .btn-orange {
+    background: linear-gradient(135deg, var(--orange), #E07A30);
+    box-shadow: 0 4px 16px rgba(255,140,66,0.35);
+  }
+
+  /* ── MAP SCREEN ── */
+  #screen-map {
+    background: linear-gradient(160deg, #EBF4FF 0%, #E6F9EE 100%);
+  }
+
+  .map-header {
+    background: white;
+    padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 2px 12px rgba(74,144,217,0.08);
+  }
+  .team-info { display: flex; align-items: center; gap: 10px; }
+  .team-mascot { font-size: 32px; }
+  .team-name { font-size: 16px; font-weight: 900; color: var(--text); }
+  .team-members { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+  .progress-badge {
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 13px; font-weight: 800;
+    padding: 6px 12px; border-radius: 20px;
+  }
+
+  .map-container {
+    flex: 1;
+    padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .map-image-wrap {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    position: relative;
+    min-height: 240px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .map-image-wrap img { width: 100%; height: auto; display: block; }
+  .map-placeholder {
+    padding: 40px 20px; text-align: center;
+    color: var(--text-muted);
+  }
+  .map-placeholder .icon { font-size: 48px; margin-bottom: 8px; }
+  .map-placeholder p { font-size: 13px; font-weight: 600; }
+
+  .stations-list {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .stations-list h3 {
+    padding: 14px 16px 10px;
+    font-size: 14px; font-weight: 800;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .station-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #F0F4FF;
+    transition: background 0.15s;
+  }
+  .station-row:last-child { border-bottom: none; }
+  .station-row.completed { opacity: 0.65; }
+  .station-row.active { background: var(--blue-light); cursor: pointer; }
+  .station-row.locked { opacity: 0.45; }
+
+  .station-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 900;
+    flex-shrink: 0;
+  }
+  .station-num.done { background: var(--green); color: white; }
+  .station-num.now { background: var(--blue); color: white; animation: pulse 1.5s infinite; }
+  .station-num.wait { background: #E8EEF8; color: var(--text-muted); }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(74,144,217,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(74,144,217,0); }
+  }
+
+  .station-info { flex: 1; }
+  .station-title { font-size: 14px; font-weight: 800; color: var(--text); }
+  .station-sub { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 1px; }
+  .station-arrow { color: var(--blue); font-size: 18px; font-weight: 900; }
+
+  .qr-panel {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px;
+  }
+  .qr-panel h3 {
+    font-size: 14px; font-weight: 800; color: var(--text);
+    margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .qr-input-row { display: flex; gap: 8px; }
+  .qr-input-row input { flex: 1; }
+  .btn-scan {
+    padding: 12px 16px;
+    background: var(--orange);
+    border: none; border-radius: var(--radius-sm);
+    color: white; font-family: 'Nunito', sans-serif;
+    font-size: 13px; font-weight: 800;
+    cursor: pointer; white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── STATION SCREENS ── */
+  .station-screen-wrap {
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  .station-header {
+    background: linear-gradient(135deg, var(--blue) 0%, #5BA3E8 100%);
+    padding: 20px 20px 24px;
+    color: white;
+  }
+  .station-header.green { background: linear-gradient(135deg, var(--green) 0%, #3DB869 100%); }
+  .station-header.orange { background: linear-gradient(135deg, var(--orange) 0%, #E07A30 100%); }
+  .station-header.purple { background: linear-gradient(135deg, #8B6CE7 0%, #A879F0 100%); }
+  .station-header.red { background: linear-gradient(135deg, #E05B5B 0%, #C84040 100%); }
+  .station-header.teal { background: linear-gradient(135deg, #2BBDBD 0%, #1FA8A8 100%); }
+
+  .station-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.2);
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: 800; margin-bottom: 10px;
+  }
+  .station-h1 { font-size: 22px; font-weight: 900; line-height: 1.2; }
+  .station-desc { font-size: 13px; color: rgba(255,255,255,0.9); margin-top: 6px; font-weight: 600; }
+
+  .station-body {
+    flex: 1; padding: 20px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+
+  .task-card {
+    background: white; border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow);
+  }
+  .task-label {
+    font-size: 11px; font-weight: 800; color: var(--blue);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .task-text {
+    font-size: 14px; line-height: 1.6; color: var(--text); font-weight: 600;
+  }
+  .riddle-box {
+    background: linear-gradient(135deg, #F0E8FF, #E8F4FF);
+    border-left: 4px solid #8B6CE7;
+    border-radius: var(--radius-sm);
+    padding: 16px; font-size: 13px;
+    line-height: 1.7; color: var(--text);
+    font-weight: 600; font-style: italic;
+    margin-top: 10px;
+  }
+
+  .photo-upload-area {
+    border: 3px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+    background: var(--bg);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .photo-upload-area:hover { border-color: var(--blue); background: var(--blue-light); }
+  .photo-upload-area .icon { font-size: 48px; margin-bottom: 8px; }
+  .photo-upload-area p { font-size: 14px; font-weight: 700; color: var(--text-muted); }
+  .photo-preview { width: 100%; border-radius: var(--radius-sm); margin-top: 12px; display: none; }
+  input[type="file"] { display: none; }
+
+  /* Drag and Drop */
+  .words-pool {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    min-height: 50px;
+    background: #F8FAFF; border-radius: var(--radius-sm);
+    padding: 12px; border: 2px dashed var(--border);
+  }
+  .word-chip {
+    background: white; border: 2px solid var(--border);
+    border-radius: 20px; padding: 7px 14px;
+    font-size: 13px; font-weight: 800;
+    cursor: grab; user-select: none;
+    transition: transform 0.1s, box-shadow 0.1s;
+    touch-action: none;
+  }
+  .word-chip:active { cursor: grabbing; transform: scale(1.05); box-shadow: var(--shadow); }
+  .word-chip.dragging { opacity: 0.4; }
+
+  .drop-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .drop-zone {
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    min-height: 100px;
+    border: 3px solid transparent;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .drop-zone-label {
+    font-size: 12px; font-weight: 800; text-align: center;
+    margin-bottom: 8px; display: flex; align-items: center;
+    justify-content: center; gap: 4px;
+  }
+  .drop-zone.green-zone { background: var(--green-light); border-color: var(--green); }
+  .drop-zone.red-zone { background: var(--red-light); border-color: var(--red); }
+  .drop-zone.over { border-style: dashed; }
+  .drop-zone .word-chip { margin: 3px; }
+
+  /* Cipher */
+  .cipher-display {
+    background: linear-gradient(135deg, #1A1A2E, #16213E);
+    border-radius: var(--radius-sm);
+    padding: 16px; font-size: 15px;
+    font-family: 'Courier New', monospace; font-weight: 700;
+    color: #00D4AA; letter-spacing: 1px; line-height: 1.6;
+    text-align: center; margin-bottom: 10px;
+  }
+  .cipher-hint {
+    background: var(--orange-light);
+    border-radius: var(--radius-sm);
+    padding: 12px; font-size: 13px;
+    color: var(--text); font-weight: 600;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+
+  /* Scenario */
+  .scenario-options { display: flex; flex-direction: column; gap: 8px; }
+  .scenario-option {
+    background: var(--bg);
+    border: 3px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .scenario-option:active { transform: scale(0.98); }
+  .scenario-option.selected-wrong { border-color: var(--red); background: var(--red-light); }
+  .scenario-option.selected-correct { border-color: var(--green); background: var(--green-light); }
+  .opt-letter {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--border); color: var(--text-muted);
+    font-size: 13px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s;
+  }
+  .selected-wrong .opt-letter { background: var(--red); color: white; }
+  .selected-correct .opt-letter { background: var(--green); color: white; }
+  .opt-text { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.5; }
+
+  .feedback-toast {
+    border-radius: var(--radius-sm); padding: 14px 16px;
+    font-size: 14px; font-weight: 700;
+    display: none; align-items: center; gap: 8px;
+  }
+  .feedback-toast.show { display: flex; }
+  .feedback-toast.success { background: var(--green-light); color: var(--green-dark); }
+  .feedback-toast.error { background: var(--red-light); color: var(--red); }
+
+  /* Celebration overlay */
+  .celebration {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; display: none;
+    flex-direction: column;
+  }
+  .celebration.show { display: flex; }
+  .celebration-card {
+    background: white;
+    border-radius: 24px;
+    padding: 32px 28px;
+    text-align: center;
+    max-width: 300px;
+    margin: 20px;
+    animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  @keyframes popIn {
+    from { transform: scale(0.5) translateY(40px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .celebration-emoji { font-size: 64px; margin-bottom: 12px; }
+  .celebration-title { font-size: 24px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+  .celebration-sub { font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 20px; }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed; width: 10px; height: 10px;
+    pointer-events: none; z-index: 999;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── CERTIFICATE SCREEN ── */
+  #screen-certificate {
+    background: linear-gradient(145deg, #EBF4FF 0%, #E6F9EE 60%, #FFF0E6 100%);
+    padding: 20px;
+    align-items: center;
+  }
+
+  .cert-wrap {
+    width: 100%; max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .cert-card {
+    background: white;
+    border-radius: 24px;
+    padding: 32px 24px;
+    box-shadow: 0 8px 40px rgba(74,144,217,0.2);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 3px solid var(--blue-mid);
+  }
+  .cert-top-band {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, var(--blue), var(--green), var(--orange));
+  }
+  .cert-header { text-align: center; margin-bottom: 24px; padding-top: 8px; }
+  .cert-logo { font-size: 48px; margin-bottom: 8px; }
+  .cert-title-label {
+    font-size: 11px; font-weight: 800; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 1.5px;
+  }
+  .cert-main-title {
+    font-size: 22px; font-weight: 900; color: var(--blue);
+    line-height: 1.2; margin: 4px 0;
+  }
+  .cert-sub-title { font-size: 13px; color: var(--text-muted); font-weight: 700; }
+  .cert-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue-mid), transparent);
+    margin: 16px 0;
+  }
+  .cert-team-name {
+    text-align: center; font-size: 28px; font-weight: 900;
+    color: var(--text); margin-bottom: 4px;
+  }
+  .cert-team-label {
+    text-align: center; font-size: 12px; color: var(--text-muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 16px;
+  }
+  .cert-members {
+    background: var(--blue-light); border-radius: var(--radius-sm);
+    padding: 14px; margin-bottom: 16px;
+    display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+  }
+  .cert-member-tag {
+    background: white; border-radius: 20px;
+    padding: 5px 12px; font-size: 13px; font-weight: 700;
+    color: var(--blue); border: 2px solid var(--blue-mid);
+  }
+  .cert-mascot-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; margin-bottom: 16px;
+  }
+  .cert-mascot-icon { font-size: 32px; }
+  .cert-mascot-name { font-size: 14px; font-weight: 800; color: var(--text); }
+  .cert-promise-box {
+    background: linear-gradient(135deg, var(--green-light), #D0F5E0);
+    border-radius: var(--radius-sm); padding: 16px;
+    border-left: 4px solid var(--green); margin-bottom: 16px;
+  }
+  .cert-promise-label {
+    font-size: 11px; font-weight: 800; color: var(--green-dark);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px;
+  }
+  .cert-promise-text {
+    font-size: 15px; font-weight: 700; color: var(--text);
+    line-height: 1.5; font-style: italic;
+  }
+  .cert-date {
+    text-align: center; font-size: 12px; color: var(--text-muted); font-weight: 600;
+  }
+  .cert-seal {
+    position: absolute; bottom: 16px; right: 16px;
+    font-size: 36px; opacity: 0.15;
+  }
+
+  .summary-card {
+    background: white; border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .summary-header {
+    background: var(--blue);
+    padding: 14px 16px;
+    color: white; font-size: 15px; font-weight: 800;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .summary-item {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .summary-item:last-child { border-bottom: none; }
+  .summary-icon { font-size: 20px; flex-shrink: 0; }
+  .summary-content { flex: 1; }
+  .summary-label { font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .summary-value { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 2px; line-height: 1.5; }
+
+  .btn-download {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, #8B6CE7, #A879F0);
+    border: none; border-radius: var(--radius);
+    color: white; font-family: 'Nunito', sans-serif;
+    font-size: 16px; font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(139,108,231,0.35);
+    margin-bottom: 10px;
+    transition: transform 0.15s;
+  }
+  .btn-download:active { transform: scale(0.97); }
+
+  .btn-restart {
+    width: 100%; padding: 14px;
+    background: white; border: 3px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 800;
+    cursor: pointer; margin-bottom: 40px;
+  }
+
+  /* Back button */
+  .back-btn {
+    background: rgba(255,255,255,0.2);
+    border: none; border-radius: 50%;
+    width: 36px; height: 36px;
+    color: white; font-size: 18px;
+    cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex; gap: 6px; margin-top: 10px;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: background 0.3s;
+  }
+  .dot.done { background: white; }
+  .dot.active { background: white; width: 24px; border-radius: 4px; }
+
+  /* Station 6 combined */
+  .promise-preview {
+    background: var(--green-light); border-radius: var(--radius-sm);
+    padding: 14px; border-left: 4px solid var(--green);
+    font-size: 14px; color: var(--text); font-weight: 700;
+    margin-top: 8px; display: none;
+  }
+
+  textarea {
+    resize: vertical; min-height: 90px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 0: ONBOARDING
+══════════════════════════════════════════ -->
+<div id="screen-onboarding" class="screen active">
+  <div class="onboard-hero">
+    <div class="hero-mascot">🌟</div>
+    <div class="hero-title">Nezaket Sahibi<br>Akranlar</div>
+    <div class="hero-sub">Dijital Oryantiring Macerası</div>
+    <div class="progress-dots" style="justify-content:center; margin-top: 12px;">
+      <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+
+  <div class="onboard-form">
+    <div class="form-card">
+      <h2><span>🏷️</span> Ekip Adı</h2>
+      <label for="team-name-input">Ekibinize bir isim verin</label>
+      <input type="text" id="team-name-input" placeholder="Örn: Nezaket Kahramanları" maxlength="30">
+    </div>
+
+    <div class="form-card">
+      <h2><span>👥</span> Ekip Üyeleri</h2>
+      <div id="members-container">
+        <div class="member-row">
+          <input type="text" placeholder="1. Üye adı" class="member-input">
+        </div>
+        <div class="member-row">
+          <input type="text" placeholder="2. Üye adı" class="member-input">
+          <button class="btn-icon btn-remove" onclick="removeMember(this)">✕</button>
+        </div>
+      </div>
+      <button class="btn-add-member" onclick="addMember()">+ Üye Ekle</button>
+    </div>
+
+    <div class="form-card">
+      <h2><span>🎭</span> Maskot Seçin</h2>
+      <div class="mascot-grid">
+        <div class="mascot-card" onclick="selectMascot(this,'🌬️','Meltem Rüzgarı')" data-icon="🌬️" data-name="Meltem Rüzgarı">
+          <div class="icon">🌬️</div>
+          <div class="name">Meltem Rüzgarı</div>
+          <div class="desc">Nazik, özgür, yenileyici</div>
+        </div>
+        <div class="mascot-card" onclick="selectMascot(this,'🌉','Gönül Köprüsü')" data-icon="🌉" data-name="Gönül Köprüsü">
+          <div class="icon">🌉</div>
+          <div class="name">Gönül Köprüsü</div>
+          <div class="desc">Bağlayıcı, umut dolu</div>
+        </div>
+        <div class="mascot-card" onclick="selectMascot(this,'🦋','Zarif Akran')" data-icon="🦋" data-name="Zarif Akran">
+          <div class="icon">🦋</div>
+          <div class="name">Zarif Akran</div>
+          <div class="desc">Dönüşüm, incelik</div>
+        </div>
+        <div class="mascot-card" onclick="selectMascot(this,'🌊','Şifa Nehri')" data-icon="🌊" data-name="Şifa Nehri">
+          <div class="icon">🌊</div>
+          <div class="name">Şifa Nehri</div>
+          <div class="desc">İyileştirici, akışkan</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="startGame()">🚀 Macerayı Başlat!</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1: MAP
+══════════════════════════════════════════ -->
+<div id="screen-map" class="screen">
+  <div class="map-header">
+    <div class="team-info">
+      <div class="team-mascot" id="map-mascot">🌟</div>
+      <div>
+        <div class="team-name" id="map-team-name">Ekip Adı</div>
+        <div class="team-members" id="map-team-members">Üyeler</div>
+      </div>
+    </div>
+    <div class="progress-badge" id="map-progress">0/6 İstasyon</div>
+  </div>
+
+  <div class="map-container">
+    <div class="map-image-wrap" id="map-image-wrap">
+      <div class="map-placeholder">
+        <div class="icon">🗺️</div>
+        <p>Harita yükleniyor…<br><small style="color:#aaa;">images/map.png</small></p>
+      </div>
+    </div>
+
+    <div class="stations-list">
+      <h3>📍 İstasyonlar</h3>
+      <div id="stations-list-inner"></div>
+    </div>
+
+    <div class="qr-panel">
+      <h3>📷 QR Kodu Tara</h3>
+      <p style="font-size:12px;color:var(--text-muted);font-weight:600;margin-bottom:10px;">
+        Sahada QR kodu tara ya da istasyon kodunu manuel gir.
+      </p>
+      <div class="qr-input-row">
+        <input type="text" id="qr-input" placeholder="Örn: ISTASYON1">
+        <button class="btn-scan" onclick="validateQR()">✓ Doğrula</button>
+      </div>
+      <div id="qr-error" style="color:var(--red);font-size:12px;font-weight:700;margin-top:6px;display:none;"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2: İSTASYON 1 – Empati & Fotoğraf
+══════════════════════════════════════════ -->
+<div id="screen-s1" class="screen">
+  <div class="station-screen-wrap">
+    <div class="station-header green">
+      <button class="back-btn" onclick="goToMap()">←</button>
+      <div class="station-badge">📍 1. İstasyon</div>
+      <div class="station-h1">Tanışma ve Empati</div>
+      <div class="station-desc">Bir akranla tanış, nezaketi birlikte yaşa!</div>
+    </div>
+    <div class="station-body">
+      <div class="task-card">
+        <div class="task-label">📋 Görev</div>
+        <div class="task-text">
+          Ekip olarak <strong>hiç tanımadığınız bir akranı bulun</strong>. Onunla tanışın ve bir akranın yapacağı nezaket dolu bir eylemi/etkinliği gerçekleştirirken birlikte <strong>ekip fotoğrafı</strong> çekinin!
+        </div>
+      </div>
+
+      <div class="task-card">
+        <div class="task-label">📸 Fotoğraf Yükle</div>
+        <div class="photo-upload-area" onclick="document.getElementById('photo1-input').click()">
+          <div class="icon" id="photo1-icon">📷</div>
+          <p id="photo1-text">Fotoğraf seç veya çek</p>
+          <input type="file" id="photo1-input" accept="image/*" capture="environment" onchange="handlePhoto('photo1-input','photo1-preview','photo1-icon','photo1-text')">
+          <img id="photo1-preview" class="photo-preview" alt="Ekip fotoğrafı">
+        </div>
+      </div>
+
+      <button class="btn-primary btn-green" id="s1-btn" onclick="completeStation(1)" disabled style="opacity:0.5">
+        ✅ 1. İstasyonu Tamamla
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3: İSTASYON 2 – Bilmece
+══════════════════════════════════════════ -->
+<div id="screen-s2" class="screen">
+  <div class="station-screen-wrap">
+    <div class="station-header orange">
+      <button class="back-btn" onclick="goToMap()">←</button>
+      <div class="station-badge">📍 2. İstasyon</div>
+      <div class="station-h1">Zehir mi, Şifa mı?</div>
+      <div class="station-desc">Bilmeceyi çöz, içini dök!</div>
+    </div>
+    <div class="station-body">
+      <div class="task-card">
+        <div class="task-label">🔮 Bilmece</div>
+        <div class="riddle-box">
+          Aynı bahçede büyüyen iki farklı rüzgarım ben;<br>
+          Biri fırtına olur, kırar dalları; diğeri meltem olur, okşar yaprakları.<br><br>
+          Gölgem düştüğü yerde bir çocuğun gülüşünü çalar,<br>
+          Kalpleri buz tutturur, duvarlar örer, dünyayı daraltır.<br><br>
+          Ama tersine dönersem, bir el uzatırım o karanlığa,<br>
+          Yarım kalmış bir resmi tamamlar, köprüler kurarım yarına.<br><br>
+          Yaşımız da birdir bizim, sıramız da, yolumuz da;<br>
+          Biri zehirdir bu ömrün, diğeri ise şifa.<br><br>
+          İki yüzüm var benim; biri karanlık bir kuyu, diğeri aydınlık bir nehir...<br>
+          <strong>Bil bakalım, ben neyim?</strong>
+        </div>
+      </div>
+
+      <div class="task-card">
+        <div class="task-label">✍️ Yorumunuz</div>
+        <p style="font-size:13px;color:var(--text-muted);font-weight:600;margin-bottom:10px;">Bu bilmece neyi anlatıyor? Düşüncelerinizi yazın:</p>
+        <textarea id="riddle-answer" placeholder="Bilmece akran ilişkilerini, özellikle zorbalık ve nezaketi anlatıyor..." oninput="checkS2()"></textarea>
+        <button class="btn-primary btn-orange" id="s2-btn" onclick="completeStation(2)" disabled style="opacity:0.5;margin-top:12px;">
+          📤 Gönder & Devam Et
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 4: İSTASYON 3 – Sürükle & Bırak
+══════════════════════════════════════════ -->
+<div id="screen-s3" class="screen">
+  <div class="station-screen-wrap">
+    <div class="station-header" style="background:linear-gradient(135deg,#8B6CE7,#A879F0)">
+      <button class="back-btn" onclick="goToMap()">←</button>
+      <div class="station-badge">📍 3. İstasyon</div>
+      <div class="station-h1">Sözlerin Gücü</div>
+      <div class="station-desc">Kelimeleri doğru kutularına taşı!</div>
+    </div>
+    <div class="station-body">
+      <div class="task-card">
+        <div class="task-label">📋 Görev</div>
+        <div class="task-text">
+          Ekranda karışık halde duran sözcükleri inceleyin. Akran nezaketine uyanları <strong style="color:var(--green-dark)">💚 Sevgi Kutusu</strong>'na, akran zorbalığına ait olanları ise <strong style="color:var(--red)">❤️‍🔥 Dönüşüm Kutusu</strong>'na sürükleyip bırakın.
+        </div>
+      </div>
+
+      <div class="task-card">
+        <div class="task-label">🔤 Kelimeler</div>
+        <div class="words-pool" id="words-pool" ondragover="event.preventDefault()" ondrop="dropToPool(event)"></div>
+        <div class="drop-zones">
+          <div class="drop-zone green-zone" id="zone-good" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropToZone(event,'good')">
+            <div class="drop-zone-label" style="color:var(--green-dark)">💚 Nezaket</div>
+          </div>
+          <div class="drop-zone red-zone" id="zone-bad" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropToZone(event,'bad')">
+            <div class="drop-zone-label" style="color:var(--red)">❤️‍🔥 Zorbalık</div>
+          </div>
+        </div>
+        <div id="s3-feedback" class="feedback-toast" style="margin-top:10px;"></div>
+      </div>
+
+      <button class="btn-primary" id="s3-btn" onclick="checkStation3()" style="background:linear-gradient(135deg,#8B6CE7,#A879F0);box-shadow:0 4px 16px rgba(139,108,231,0.35)">
+        ✅ Kontrol Et
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 5: İSTASYON 4 – Şifre
+══════════════════════════════════════════ -->
+<div id="screen-s4" class="screen">
+  <div class="station-screen-wrap">
+    <div class="station-header red">
+      <button class="back-btn" onclick="goToMap()">←</button>
+      <div class="station-badge">📍 4. İstasyon</div>
+      <div class="station-h1">Perspektif Değiştir</div>
+      <div class="station-desc">Sezar şifresi – harfleri 3 adım geri kaydır!</div>
+    </div>
+    <div class="station-body">
+      <div class="task-card">
+        <div class="task-label">🔐 Şifreli Metin</div>
+        <div class="cipher-display">ŞHD QDH DDD UDH DQP DN, G VD NOD PD NG TT GX U.</div>
+        <div class="cipher-hint">
+          <span>💡</span>
+          <span>Her harfi Türk alfabesinde <strong>3 adım geriye</strong> kaydırarak şifreyi çöz!</span>
+        </div>
+      </div>
+
+      <div class="task-card">
+        <div class="task-label">✍️ Çözümünüz</div>
+        <input type="text" id="cipher-answer" placeholder="Çözümü buraya yazın..." oninput="checkCipher()">
+        <div id="cipher-feedback" class="feedback-toast" style="margin-top:10px;"></div>
+        <div style="margin-top:10px;background:var(--bg);border-radius:8px;padding:10px;">
+          <p style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">💡 İpucu – Alfabe Tablosu (3 ileri → 3 geri)</p>
+          <p style="font-size:11px;color:var(--text-muted);font-weight:600;line-height:1.7">Şifreli: Ş→N, H→E, D→A, Q→Z, R→E, P→M…</p>
+        </div>
+        <button class="btn-primary" id="s4-btn" onclick="completeStation(4)" disabled style="opacity:0.5;margin-top:12px;background:linear-gradient(135deg,#E05B5B,#C84040);box-shadow:0 4px 16px rgba(224,91,91,0.35)">
+          ✅ 4. İstasyonu Tamamla
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 6: İSTASYON 5 – Senaryo
+══════════════════════════════════════════ -->
+<div id="screen-s5" class="screen">
+  <div class="station-screen-wrap">
+    <div class="station-header" style="background:linear-gradient(135deg,#2BBDBD,#1FA8A8)">
+      <button class="back-btn" onclick="goToMap()">←</button>
+      <div class="station-badge">📍 5. İstasyon</div>
+      <div class="station-h1">Kriz Masası</div>
+      <div class="station-desc">Sen ne yapardın?</div>
+    </div>
+    <div class="station-body">
+      <div class="task-card">
+        <div class="task-label">📖 Senaryo</div>
+        <div class="task-text">
+          Okul yemekhanesinde bir arkadaşınızın elindeki tepsi kazaen dökülüyor ve etraftaki bir grup <strong>onunla yüksek sesle alay edip videoya çekmeye başlıyor</strong>. Yere kapaklanan arkadaşınızın çok utandığını ve ağlamak üzere olduğunu görüyorsunuz.<br><br>
+          Ekibinizle tartışın ve <strong>ne yapacağınıza karar verin</strong>:
+        </div>
+      </div>
+
+      <div class="task-card">
+        <div class="task-label">🤔 Seçenekler</div>
+        <div class="scenario-options" id="scenario-options">
+          <div class="scenario-option" onclick="selectOption(this,'wrong')" data-type="wrong">
+            <div class="opt-letter">A</div>
+            <div class="opt-text">«Bizi ilgilendirmez» deyip masamıza geri dönmek.</div>
+          </div>
+          <div class="scenario-option" onclick="selectOption(this,'wrong')" data-type="wrong">
+            <div class="opt-letter">B</div>
+            <div class="opt-text">Alay eden gruba bağırıp çağırarak fiziksel kavga başlatmak.</div>
+          </div>
+          <div class="scenario-option" onclick="selectOption(this,'correct')" data-type="correct">
+            <div class="opt-letter">C</div>
+            <div class="opt-text">Videoya çekenleri uyararak durdurmak, yerdeki arkadaşın elinden tutup kaldırmak, dökülenleri toplamaya yardım etmek ve onu sakin bir yere götürmek.</div>
+          </div>
+        </div>
+        <div id="s5-feedback" class="feedback-toast" style="margin-top:10px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 7: İSTASYON 6 – Nezaket Anıtı
+══════════════════════════════════════════ -->
+<div id="screen-s6" class="screen">
+  <div class="station-screen-wrap">
+    <div class="station-header" style="background:linear-gradient(135deg,#FF8C42,#E07A30)">
+      <button class="back-btn" onclick="goToMap()">←</button>
+      <div class="station-badge">📍 6. İstasyon – FİNAL</div>
+      <div class="station-h1">Nezaket Anıtı 🏆</div>
+      <div class="station-desc">Yolculuğun son durağı – sözünü ver!</div>
+    </div>
+    <div class="station-body">
+      <div class="task-card">
+        <div class="task-label">🎉 Tebrikler!</div>
+        <div class="task-text">
+          Akran zorbalığına karşı durmayı ve nezaketi yaymayı öğrendiniz. Şimdi ekibinizle birlikte <strong>bir fotoğraf çekip</strong> ve bundan sonra uygulayacağınız <strong>Nezaket Sözünüzü</strong> dijital panomuza asın!
+        </div>
+      </div>
+
+      <div class="task-card">
+        <div class="task-label">📸 Final Fotoğrafı</div>
+        <div class="photo-upload-area" onclick="document.getElementById('photo6-input').click()">
+          <div class="icon" id="photo6-icon">📷</div>
+          <p id="photo6-text">Ekip fotoğrafı çek / yükle</p>
+          <input type="file" id="photo6-input" accept="image/*" capture="environment" onchange="handlePhoto('photo6-input','photo6-preview','photo6-icon','photo6-text')">
+          <img id="photo6-preview" class="photo-preview" alt="Final fotoğrafı">
+        </div>
+      </div>
+
+      <div class="task-card">
+        <div class="task-label">✍️ Nezaket Sözü (Manifesto)</div>
+        <p style="font-size:13px;color:var(--text-muted);font-weight:600;margin-bottom:10px;">
+          Bundan sonra akranlarınıza nezaket göstermek için söz verin:
+        </p>
+        <textarea id="promise-text" placeholder="Örn: Biz, her akranımıza saygıyla davranmayı, zorbalık gördüğümüzde ses çıkarmayı söz veriyoruz!" oninput="checkS6()"></textarea>
+        <div id="promise-preview" class="promise-preview"></div>
+        <button class="btn-primary btn-orange" id="s6-btn" onclick="finishGame()" disabled style="opacity:0.5;margin-top:12px;">
+          🏁 Oyunu Bitir & Sertifikayı Al!
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN 8: SERTİFİKA
+══════════════════════════════════════════ -->
+<div id="screen-certificate" class="screen">
+  <div class="cert-wrap">
+    <div id="cert-card" class="cert-card">
+      <div class="cert-top-band"></div>
+      <div class="cert-seal">🏅</div>
+      <div class="cert-header">
+        <div class="cert-logo">🌟</div>
+        <div class="cert-title-label">Nezaket Elçileri</div>
+        <div class="cert-main-title">Başarı Sertifikası</div>
+        <div class="cert-sub-title">Dijital Oryantiring Tamamlandı ✓</div>
+      </div>
+      <div class="cert-divider"></div>
+      <div class="cert-team-label">Ekip Adı</div>
+      <div class="cert-team-name" id="cert-team-name">—</div>
+      <div class="cert-members" id="cert-members"></div>
+      <div class="cert-mascot-row">
+        <div class="cert-mascot-icon" id="cert-mascot">🌟</div>
+        <div class="cert-mascot-name" id="cert-mascot-name">Maskot</div>
+      </div>
+      <div class="cert-promise-box">
+        <div class="cert-promise-label">💚 Nezaket Sözümüz</div>
+        <div class="cert-promise-text" id="cert-promise">—</div>
+      </div>
+      <div class="cert-divider"></div>
+      <div class="cert-date" id="cert-date">—</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-header">📋 Ekip Özeti</div>
+      <div id="summary-items"></div>
+    </div>
+
+    <button class="btn-download" onclick="downloadCertificate()">⬇️ Sertifikayı Kaydet (Ekran Görüntüsü)</button>
+    <button class="btn-restart" onclick="restartGame()">🔄 Yeni Oyun Başlat</button>
+  </div>
+</div>
+
+
+<!-- CELEBRATION OVERLAY -->
+<div class="celebration" id="celebration">
+  <div class="celebration-card">
+    <div class="celebration-emoji" id="cel-emoji">🎉</div>
+    <div class="celebration-title" id="cel-title">Harika!</div>
+    <div class="celebration-sub" id="cel-sub">İstasyon tamamlandı!</div>
+    <button class="btn-primary" onclick="closeCelebration()">Devam Et →</button>
+  </div>
+</div>
+
+
+<script>
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let state = {
+  teamName: '',
+  members: [],
+  mascotIcon: '',
+  mascotName: '',
+  currentStation: 0,   // 0=not started, 1-6=active
+  completedStations: [],
+  data: {}
+};
+
+const STATION_QR_CODES = {
+  'ISTASYON1': 1, 'istasyon1': 1, 'station1': 1, '1':1,
+  'ISTASYON2': 2, 'istasyon2': 2, 'station2': 2, '2':2,
+  'ISTASYON3': 3, 'istasyon3': 3, 'station3': 3, '3':3,
+  'ISTASYON4': 4, 'istasyon4': 4, 'station4': 4, '4':4,
+  'ISTASYON5': 5, 'istasyon5': 5, 'station5': 5, '5':5,
+  'ISTASYON6': 6, 'istasyon6': 6, 'station6': 6, '6':6,
+};
+
+const STATION_INFO = [
+  {num:1, title:'Tanışma ve Empati', sub:'Fotoğraf görevi', icon:'📸', color:'green'},
+  {num:2, title:'Zehir mi, Şifa mı?', sub:'Bilmece & yorum', icon:'🔮', color:'orange'},
+  {num:3, title:'Sözlerin Gücü', sub:'Kelime ayıklama oyunu', icon:'🎯', color:'purple'},
+  {num:4, title:'Perspektif Değiştir', sub:'Şifre çözme', icon:'🔐', color:'red'},
+  {num:5, title:'Kriz Masası', sub:'Senaryo seçimi', icon:'⚖️', color:'teal'},
+  {num:6, title:'Nezaket Anıtı', sub:'Final & manifesto', icon:'🏆', color:'orange'},
+];
+
+function saveState() {
+  localStorage.setItem('nesak_state', JSON.stringify(state));
+}
+function loadState() {
+  const s = localStorage.getItem('nesak_state');
+  if (s) { try { state = JSON.parse(s); } catch(e){} }
+}
+
+// ═══════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════
+let memberCount = 2;
+function addMember() {
+  memberCount++;
+  const container = document.getElementById('members-container');
+  const row = document.createElement('div');
+  row.className = 'member-row';
+  row.innerHTML = `<input type="text" placeholder="${memberCount}. Üye adı" class="member-input">
+    <button class="btn-icon btn-remove" onclick="removeMember(this)">✕</button>`;
+  container.appendChild(row);
+}
+function removeMember(btn) {
+  btn.parentElement.remove();
+}
+
+let selectedMascot = null;
+function selectMascot(el, icon, name) {
+  document.querySelectorAll('.mascot-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMascot = {icon, name};
+}
+
+function startGame() {
+  const teamName = document.getElementById('team-name-input').value.trim();
+  const members = [...document.querySelectorAll('.member-input')]
+    .map(i => i.value.trim()).filter(Boolean);
+
+  if (!teamName) { alert('Lütfen ekip adı girin!'); return; }
+  if (members.length < 1) { alert('En az bir üye ekleyin!'); return; }
+  if (!selectedMascot) { alert('Bir maskot seçin!'); return; }
+
+  state.teamName = teamName;
+  state.members = members;
+  state.mascotIcon = selectedMascot.icon;
+  state.mascotName = selectedMascot.name;
+  state.currentStation = 1;
+  state.completedStations = [];
+  state.data = {};
+  saveState();
+  renderMap();
+  showScreen('screen-map');
+}
+
+// ═══════════════════════════════
+// MAP
+// ═══════════════════════════════
+function renderMap() {
+  document.getElementById('map-mascot').textContent = state.mascotIcon;
+  document.getElementById('map-team-name').textContent = state.teamName;
+  document.getElementById('map-team-members').textContent = state.members.join(', ');
+  document.getElementById('map-progress').textContent = state.completedStations.length + '/6 İstasyon';
+
+  // Try to load map image
+  const wrap = document.getElementById('map-image-wrap');
+  const img = new Image();
+  img.onload = () => {
+    wrap.innerHTML = '';
+    wrap.appendChild(img);
+    img.style.width = '100%';
+    img.style.height = 'auto';
+  };
+  img.src = 'images/map.png';
+
+  // Stations list
+  const list = document.getElementById('stations-list-inner');
+  list.innerHTML = '';
+  STATION_INFO.forEach(st => {
+    const done = state.completedStations.includes(st.num);
+    const active = st.num === state.currentStation && !done;
+    const locked = !done && st.num !== state.currentStation;
+    const row = document.createElement('div');
+    row.className = 'station-row ' + (done ? 'completed' : active ? 'active' : 'locked');
+    if (active) row.onclick = () => openStation(st.num);
+    row.innerHTML = `
+      <div class="station-num ${done ? 'done' : active ? 'now' : 'wait'}">
+        ${done ? '✓' : st.icon}
+      </div>
+      <div class="station-info">
+        <div class="station-title">${st.num}. ${st.title}</div>
+        <div class="station-sub">${st.sub}</div>
+      </div>
+      ${active ? '<div class="station-arrow">›</div>' : ''}
+    `;
+    list.appendChild(row);
+  });
+}
+
+function goToMap() {
+  renderMap();
+  showScreen('screen-map');
+}
+
+function validateQR() {
+  const code = document.getElementById('qr-input').value.trim();
+  const errEl = document.getElementById('qr-error');
+  errEl.style.display = 'none';
+
+  // URL param support: nesak.tech/?istasyon=3
+  const stNum = STATION_QR_CODES[code] || STATION_QR_CODES[code.toUpperCase()];
+  if (!stNum) {
+    errEl.textContent = '❌ Geçersiz kod. Örn: ISTASYON1';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (state.completedStations.includes(stNum)) {
+    errEl.textContent = '✓ Bu istasyon zaten tamamlandı!';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (stNum !== state.currentStation) {
+    errEl.textContent = `⚠️ Sıradaki istasyon ${state.currentStation}. İstasyon!`;
+    errEl.style.display = 'block';
+    return;
+  }
+  document.getElementById('qr-input').value = '';
+  openStation(stNum);
+}
+
+function openStation(num) {
+  const screens = {1:'screen-s1',2:'screen-s2',3:'screen-s3',4:'screen-s4',5:'screen-s5',6:'screen-s6'};
+  if (num === 3) initStation3();
+  showScreen(screens[num]);
+}
+
+// Check for URL params on load
+function checkURLParams() {
+  const params = new URLSearchParams(window.location.search);
+  const ist = params.get('istasyon');
+  if (ist && state.teamName) {
+    const num = parseInt(ist);
+    if (num >= 1 && num <= 6) {
+      renderMap();
+      showScreen('screen-map');
+      setTimeout(() => {
+        if (num === state.currentStation) openStation(num);
+      }, 500);
+    }
+  }
+}
+
+// ═══════════════════════════════
+// PHOTO HANDLER
+// ═══════════════════════════════
+function handlePhoto(inputId, previewId, iconId, textId) {
+  const file = document.getElementById(inputId).files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById(previewId);
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+    document.getElementById(iconId).textContent = '✅';
+    document.getElementById(textId).textContent = 'Fotoğraf seçildi! Değiştirmek için tekrar tıkla.';
+
+    // Save to state
+    if (inputId === 'photo1-input') {
+      state.data.photo1 = e.target.result;
+      document.getElementById('s1-btn').disabled = false;
+      document.getElementById('s1-btn').style.opacity = '1';
+    } else if (inputId === 'photo6-input') {
+      state.data.photo6 = e.target.result;
+      checkS6();
+    }
+    saveState();
+  };
+  reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════
+// STATION 2 – Riddle
+// ═══════════════════════════════
+function checkS2() {
+  const ans = document.getElementById('riddle-answer').value.trim();
+  const btn = document.getElementById('s2-btn');
+  if (ans.length >= 20) {
+    btn.disabled = false; btn.style.opacity = '1';
+  } else {
+    btn.disabled = true; btn.style.opacity = '0.5';
+  }
+}
+
+// ═══════════════════════════════
+// STATION 3 – Drag & Drop
+// ═══════════════════════════════
+const WORDS = [
+  {text:'Dışlama', correct:'bad'},
+  {text:'Takdir Etme', correct:'good'},
+  {text:'Dedikodu', correct:'bad'},
+  {text:'Lakap Takma', correct:'bad'},
+  {text:'Destek Olma', correct:'good'},
+  {text:'İltifat', correct:'good'},
+  {text:'Görmezden Gelme', correct:'bad'},
+  {text:'Paylaşma', correct:'good'},
+  {text:'Teşvik Etme', correct:'good'},
+];
+let dragWord = null;
+
+function initStation3() {
+  const pool = document.getElementById('words-pool');
+  const zGood = document.getElementById('zone-good');
+  const zBad = document.getElementById('zone-bad');
+
+  // Only reset if pool is empty (don't reinit if already placed)
+  const totalPlaced = zGood.querySelectorAll('.word-chip').length + zBad.querySelectorAll('.word-chip').length;
+  if (pool.querySelectorAll('.word-chip').length === 0 && totalPlaced === 0) {
+    // shuffle
+    const shuffled = [...WORDS].sort(() => Math.random() - 0.5);
+    pool.innerHTML = '';
+    shuffled.forEach(w => {
+      const chip = document.createElement('div');
+      chip.className = 'word-chip';
+      chip.textContent = w.text;
+      chip.dataset.correct = w.correct;
+      chip.draggable = true;
+      chip.addEventListener('dragstart', e => {
+        dragWord = chip;
+        setTimeout(() => chip.classList.add('dragging'), 0);
+        e.dataTransfer.setData('text', w.text);
+      });
+      chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+
+      // Touch support
+      addTouchDrag(chip);
+      pool.appendChild(chip);
+    });
+  }
+}
+
+function addTouchDrag(chip) {
+  let startX, startY, clone;
+  chip.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY;
+    clone = chip.cloneNode(true);
+    clone.style.cssText = `position:fixed;z-index:9999;opacity:0.85;pointer-events:none;top:${startY-20}px;left:${startX-40}px;`;
+    document.body.appendChild(clone);
+    dragWord = chip;
+    chip.classList.add('dragging');
+    e.preventDefault();
+  }, {passive:false});
+
+  chip.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    if (clone) { clone.style.top=(t.clientY-20)+'px'; clone.style.left=(t.clientX-40)+'px'; }
+    e.preventDefault();
+  }, {passive:false});
+
+  chip.addEventListener('touchend', e => {
+    if (clone) { clone.remove(); clone = null; }
+    chip.classList.remove('dragging');
+    const t = e.changedTouches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    const zone = el?.closest('.drop-zone');
+    if (zone) {
+      const zoneId = zone.id === 'zone-good' ? 'good' : 'bad';
+      dropWordToZone(chip, zoneId);
+    }
+    dragWord = null;
+  });
+}
+
+function dropToZone(event, zoneId) {
+  event.preventDefault();
+  document.getElementById('zone-good').classList.remove('over');
+  document.getElementById('zone-bad').classList.remove('over');
+  if (dragWord) dropWordToZone(dragWord, zoneId);
+}
+
+function dropToPool(event) {
+  event.preventDefault();
+  if (dragWord) {
+    const pool = document.getElementById('words-pool');
+    pool.appendChild(dragWord);
+  }
+}
+
+function dropWordToZone(chip, zoneId) {
+  const zone = document.getElementById('zone-' + zoneId);
+  zone.classList.remove('over');
+  zone.appendChild(chip);
+  // Remove from other zone if present
+}
+
+function checkStation3() {
+  const zGood = document.getElementById('zone-good');
+  const zBad = document.getElementById('zone-bad');
+  const pool = document.getElementById('words-pool');
+  const feedback = document.getElementById('s3-feedback');
+
+  const goodWords = [...zGood.querySelectorAll('.word-chip')];
+  const badWords = [...zBad.querySelectorAll('.word-chip')];
+  const poolWords = [...pool.querySelectorAll('.word-chip')];
+
+  if (poolWords.length > 0) {
+    feedback.className = 'feedback-toast show error';
+    feedback.innerHTML = '⚠️ Henüz kutulara koymadığın kelimeler var!';
+    return;
+  }
+
+  let allCorrect = true;
+  [...goodWords, ...badWords].forEach(chip => {
+    const expected = chip.dataset.correct;
+    const inZone = chip.closest('#zone-good') ? 'good' : 'bad';
+    if (expected !== inZone) {
+      allCorrect = false;
+      chip.style.border = '3px solid var(--red)';
+    } else {
+      chip.style.border = '3px solid var(--green)';
+    }
+  });
+
+  if (allCorrect) {
+    feedback.className = 'feedback-toast show success';
+    feedback.innerHTML = '🎉 Mükemmel! Tüm kelimeler doğru yerinde!';
+    setTimeout(() => completeStation(3), 1000);
+  } else {
+    feedback.className = 'feedback-toast show error';
+    feedback.innerHTML = '❌ Bazı kelimeler yanlış kutuda. Kırmızı kenarlıklıları kontrol et!';
+  }
+}
+
+// ═══════════════════════════════
+// STATION 4 – Cipher
+// ═══════════════════════════════
+const CIPHER_ANSWER = 'nezaket anlamaktır desteklemek güç verir';
+function checkCipher() {
+  const ans = document.getElementById('cipher-answer').value.trim().toLowerCase()
+    .replace(/[.,!?;:]/g,'').replace(/\s+/g,' ');
+  const fb = document.getElementById('cipher-feedback');
+  const btn = document.getElementById('s4-btn');
+
+  // Accept multiple normalizations
+  const normalized = CIPHER_ANSWER.replace(/[.,!?;:]/g,'').replace(/\s+/g,' ');
+  if (ans === normalized || ans.includes('nezaket') && ans.includes('desteklemek')) {
+    fb.className = 'feedback-toast show success';
+    fb.innerHTML = '✅ Doğru! Şifreyi çözdünüz!';
+    btn.disabled = false; btn.style.opacity = '1';
+  } else if (ans.length > 5) {
+    fb.className = 'feedback-toast show error';
+    fb.innerHTML = '❌ Henüz tam doğru değil. Harfleri 3 adım geri kaydır!';
+    btn.disabled = true; btn.style.opacity = '0.5';
+  }
+}
+
+// ═══════════════════════════════
+// STATION 5 – Scenario
+// ═══════════════════════════════
+function selectOption(el, type) {
+  if (document.getElementById('s5-feedback').classList.contains('show')) return;
+  document.querySelectorAll('.scenario-option').forEach(o => {
+    o.classList.remove('selected-correct', 'selected-wrong');
+  });
+  const fb = document.getElementById('s5-feedback');
+  if (type === 'correct') {
+    el.classList.add('selected-correct');
+    fb.className = 'feedback-toast show success';
+    fb.innerHTML = '🌟 Harika! Bu tam bir akran nezaketi örneği!';
+    setTimeout(() => completeStation(5), 1200);
+  } else {
+    el.classList.add('selected-wrong');
+    fb.className = 'feedback-toast show error';
+    fb.innerHTML = '💭 Bu seçenek doğru değil. Ekiple tekrar tartışın!';
+    setTimeout(() => {
+      el.classList.remove('selected-wrong');
+      fb.className = 'feedback-toast';
+    }, 1500);
+  }
+}
+
+// ═══════════════════════════════
+// STATION 6
+// ═══════════════════════════════
+function checkS6() {
+  const promise = document.getElementById('promise-text').value.trim();
+  const hasPhoto = !!state.data.photo6;
+  const btn = document.getElementById('s6-btn');
+  const preview = document.getElementById('promise-preview');
+
+  if (promise.length >= 20) {
+    preview.style.display = 'block';
+    preview.textContent = '💚 "' + promise + '"';
+  } else {
+    preview.style.display = 'none';
+  }
+
+  if (promise.length >= 20) {
+    btn.disabled = false; btn.style.opacity = '1';
+  } else {
+    btn.disabled = true; btn.style.opacity = '0.5';
+  }
+}
+
+// ═══════════════════════════════
+// COMPLETE STATION
+// ═══════════════════════════════
+function completeStation(num) {
+  // Save station data
+  if (num === 2) state.data.riddleAnswer = document.getElementById('riddle-answer').value;
+  if (num === 6) state.data.promise = document.getElementById('promise-text').value;
+
+  if (!state.completedStations.includes(num)) {
+    state.completedStations.push(num);
+  }
+  state.currentStation = num < 6 ? num + 1 : 6;
+  saveState();
+
+  const info = STATION_INFO[num-1];
+  const msgs = [
+    {emoji:'🌟', title:'Harika!', sub:'1. İstasyon tamamlandı! Empatin tescillendi.'},
+    {emoji:'🔮', title:'Düşünceli!', sub:'2. İstasyon tamamlandı! Bilmece çözüldü.'},
+    {emoji:'🎯', title:'Mükemmel!', sub:'3. İstasyon tamamlandı! Kelimeler yerini buldu.'},
+    {emoji:'🔑', title:'Şifre Kırıldı!', sub:'4. İstasyon tamamlandı! Empati derinleşti.'},
+    {emoji:'⚡', title:'Cesur Seçim!', sub:'5. İstasyon tamamlandı! Akran nezaketi yaşandı.'},
+    {emoji:'🏆', title:'Efsane Ekip!', sub:'6 istasyonu tamamladınız! Sertifikanız hazır!'},
+  ];
+  const m = msgs[num-1];
+  document.getElementById('cel-emoji').textContent = m.emoji;
+  document.getElementById('cel-title').textContent = m.title;
+  document.getElementById('cel-sub').textContent = m.sub;
+  document.getElementById('celebration').classList.add('show');
+  spawnConfetti();
+}
+
+function closeCelebration() {
+  document.getElementById('celebration').classList.remove('show');
+  if (state.completedStations.length === 6) {
+    renderCertificate();
+    showScreen('screen-certificate');
+    spawnConfetti();
+  } else {
+    goToMap();
+  }
+}
+
+// ═══════════════════════════════
+// FINISH GAME
+// ═══════════════════════════════
+function finishGame() {
+  completeStation(6);
+}
+
+// ═══════════════════════════════
+// CERTIFICATE
+// ═══════════════════════════════
+function renderCertificate() {
+  document.getElementById('cert-team-name').textContent = state.teamName;
+  document.getElementById('cert-mascot').textContent = state.mascotIcon;
+  document.getElementById('cert-mascot-name').textContent = state.mascotName;
+
+  const membersEl = document.getElementById('cert-members');
+  membersEl.innerHTML = '';
+  state.members.forEach(m => {
+    const tag = document.createElement('div');
+    tag.className = 'cert-member-tag';
+    tag.textContent = m;
+    membersEl.appendChild(tag);
+  });
+
+  const promise = state.data.promise || '—';
+  document.getElementById('cert-promise').textContent = promise;
+
+  const now = new Date();
+  document.getElementById('cert-date').textContent =
+    now.toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'});
+
+  // Summary
+  const items = document.getElementById('summary-items');
+  items.innerHTML = '';
+  const summaryData = [
+    {icon:'📸', label:'1. İstasyon – Tanışma Fotoğrafı', value: state.data.photo1 ? '✓ Fotoğraf yüklendi' : '—'},
+    {icon:'🔮', label:'2. İstasyon – Bilmece Cevabı', value: state.data.riddleAnswer || '—'},
+    {icon:'🎯', label:'3. İstasyon – Kelime Ayıklama', value: state.completedStations.includes(3) ? '✓ Tamamlandı' : '—'},
+    {icon:'🔐', label:'4. İstasyon – Şifre Çözümü', value: state.completedStations.includes(4) ? '✓ Çözüldü' : '—'},
+    {icon:'⚖️', label:'5. İstasyon – Senaryo Seçimi', value: state.completedStations.includes(5) ? '✓ C şıkkı seçildi' : '—'},
+    {icon:'🏆', label:'Nezaket Sözü', value: state.data.promise || '—'},
+  ];
+  summaryData.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'summary-item';
+    el.innerHTML = `<div class="summary-icon">${d.icon}</div>
+      <div class="summary-content">
+        <div class="summary-label">${d.label}</div>
+        <div class="summary-value">${d.value}</div>
+      </div>`;
+    items.appendChild(el);
+  });
+}
+
+function downloadCertificate() {
+  alert('📸 İpucu: Cihazınızın ekran görüntüsü alma özelliğini kullanabilir ya da tarayıcınızdan "Yazdır > PDF olarak kaydet" seçeneğini deneyebilirsiniz!\n\niOS: Güç + Ses Kısma\nAndroid: Güç + Ses Kısma veya 3 parmak kaydırma');
+}
+
+function restartGame() {
+  if (!confirm('Oyunu sıfırlamak istediğinize emin misiniz?')) return;
+  localStorage.removeItem('nesak_state');
+  state = {teamName:'',members:[],mascotIcon:'',mascotName:'',currentStation:0,completedStations:[],data:{}};
+  document.getElementById('team-name-input').value = '';
+  document.querySelectorAll('.member-input').forEach((inp,i) => {
+    if(i>1) inp.closest('.member-row').remove();
+    else inp.value = '';
+  });
+  document.querySelectorAll('.mascot-card').forEach(c => c.classList.remove('selected'));
+  selectedMascot = null;
+  showScreen('screen-onboarding');
+}
+
+// ═══════════════════════════════
+// CONFETTI
+// ═══════════════════════════════
+function spawnConfetti() {
+  const colors = ['#4A90D9','#52C97C','#FF8C42','#8B6CE7','#FFD700','#FF6B6B'];
+  for (let i = 0; i < 50; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = '-10px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    piece.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+    piece.style.animationDelay = (Math.random() * 1) + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 4000);
+  }
+}
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  if (state.teamName) {
+    renderMap();
+    checkURLParams();
+    if (state.completedStations.length === 6) {
+      renderCertificate();
+      showScreen('screen-certificate');
+    } else {
+      showScreen('screen-map');
+    }
+  } else {
+    checkURLParams();
+  }
+});
+</script>
+</body>
+</html>
