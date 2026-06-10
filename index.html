@@ -4,24 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Nezaket Sahibi Akranlar</title>
-<script>
-// jsQR'ı birden fazla kaynaktan yüklemeyi dene
-window._jsqrLoaded = false;
-const _jsqrSources = [
-  'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js',
-  'https://unpkg.com/jsqr@1.4.0/dist/jsQR.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js'
-];
-function _tryLoadJsQR(idx){
-  if(idx>=_jsqrSources.length){ console.warn('jsQR tüm kaynaklardan yüklenemedi'); return; }
-  const s=document.createElement('script');
-  s.src=_jsqrSources[idx];
-  s.onload=()=>{ window._jsqrLoaded=true; console.log('jsQR yüklendi:',_jsqrSources[idx]); };
-  s.onerror=()=>{ console.warn('jsQR kaynağı başarısız:',_jsqrSources[idx]); _tryLoadJsQR(idx+1); };
-  document.head.appendChild(s);
-}
-_tryLoadJsQR(0);
-</script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -156,18 +139,14 @@ textarea{resize:vertical;min-height:84px}
 .qr-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px}
 .qr-panel h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px;display:flex;align-items:center;gap:6px}
 .qr-desc{font-size:12px;color:var(--text3);font-weight:500;margin-bottom:12px;line-height:1.55}
-.cam-wrap{position:relative;border-radius:var(--rs);overflow:hidden;background:#000;display:none;margin-bottom:10px}
-.cam-wrap.open{display:block}
-#qr-video{width:100%;display:block;max-height:260px;object-fit:cover}
-.cam-ui{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.cam-frame{width:175px;height:175px;border:2.5px solid var(--blue);border-radius:13px;box-shadow:0 0 0 2000px rgba(0,0,0,.5);position:relative}
-.cam-frame::before,.cam-frame::after{content:'';position:absolute;width:20px;height:20px;border-color:var(--green);border-style:solid}
-.cam-frame::before{top:-3px;left:-3px;border-width:4px 0 0 4px;border-radius:5px 0 0 0}
-.cam-frame::after{bottom:-3px;right:-3px;border-width:0 4px 4px 0;border-radius:0 0 5px 0}
-.scan-line{position:absolute;left:0;right:0;height:2px;background:var(--green);box-shadow:0 0 7px var(--green);animation:scanY 2s ease-in-out infinite}
-@keyframes scanY{0%,100%{top:0}50%{top:calc(100% - 2px)}}
-.cam-close{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.65);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;pointer-events:all}
-#qr-canvas{display:none}
+#qr-reader{width:100%;border-radius:var(--rs);overflow:hidden;margin-bottom:10px}
+#qr-reader video{border-radius:var(--rs)}
+/* html5-qrcode varsayılan butonlarını gizle — bizim butonumuzu kullanıyoruz */
+#qr-reader__dashboard_section_csr button,
+#qr-reader__dashboard_section_swaplink,
+#qr-reader__header_message,
+#qr-reader__status_span{ font-family:var(--font)!important; }
+#qr-reader__filescan_input{ display:none!important; }
 
 /* ═══ STATION HEADER ═══ */
 .st-wrap{display:flex;flex-direction:column;min-height:100vh}
@@ -342,16 +321,10 @@ textarea{resize:vertical;min-height:84px}
     <!-- QR SCANNER -->
     <div class="qr-panel">
       <h3>📷 QR Kod Tarayıcı</h3>
-      <p class="qr-desc">İstasyondaki QR kodu kameranıza okutun. Tarayıcı sizi otomatik yönlendirecektir.<br><strong style="color:var(--orange);font-size:11px">⚠️ Kamera için HTTPS gereklidir (GitHub Pages, Netlify vb.)</strong></p>
-      <button class="btn btn-blue" id="btn-start-scan" onclick="startCam()">📷 Kamerayı Aç &amp; QR Tara</button>
-      <div class="cam-wrap" id="cam-wrap">
-        <video id="qr-video" playsinline muted autoplay></video>
-        <canvas id="qr-canvas"></canvas>
-        <div class="cam-ui">
-          <div class="cam-frame"><div class="scan-line"></div></div>
-        </div>
-        <button class="cam-close" onclick="stopCam()">✕</button>
-      </div>
+      <p class="qr-desc">İstasyondaki QR kodu kameranıza okutun. Tarayıcı sizi otomatik yönlendirecektir.</p>
+      <button class="btn btn-blue" id="btn-start-scan" onclick="startQR()">📷 Kamerayı Aç &amp; QR Tara</button>
+      <button class="btn btn-ghost" id="btn-stop-scan" onclick="stopQR()" style="display:none;margin-top:8px">✕ Kamerayı Kapat</button>
+      <div id="qr-reader" style="margin-top:10px"></div>
       <div id="qr-fb" class="toast" style="margin-top:8px"></div>
     </div>
   </div>
@@ -637,7 +610,7 @@ const WORDS_DATA = [
 // NAVIGATION
 // ═══════════════════════════════
 function show(id){ document.querySelectorAll('.scr').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
-function goMap(){ stopCam(); renderMap(); show('scr-map'); }
+function goMap(){ stopQR(); renderMap(); show('scr-map'); }
 
 // ═══════════════════════════════
 // ONBOARDING
@@ -699,161 +672,74 @@ function renderMap(){
 }
 
 // ═══════════════════════════════
-// QR SCANNER – BarcodeDetector (built-in) + jsQR fallback
+// QR SCANNER – html5-qrcode kütüphanesi
 // ═══════════════════════════════
-let camStream=null, rafId=null, scanning=false;
-let _barcodeDetector=null;
+let _html5QrScanner = null;
 
-// Hangi tarama yöntemini kullanacağımızı belirle
-function _getDetectorMode(){
-  if(window.BarcodeDetector){
-    try{ _barcodeDetector=new BarcodeDetector({formats:['qr_code']}); return 'native'; }catch(e){}
-  }
-  if(typeof jsQR==='function') return 'jsqr';
-  return null;
-}
+async function startQR(){
+  const fb = document.getElementById('qr-fb');
+  const btnStart = document.getElementById('btn-start-scan');
+  const btnStop = document.getElementById('btn-stop-scan');
 
-async function startCam(){
-  const fb=document.getElementById('qr-fb');
-  const btn=document.getElementById('btn-start-scan');
-  const wrap=document.getElementById('cam-wrap');
-  const video=document.getElementById('qr-video');
-
-  // HTTPS kontrolü
-  const proto=location.protocol, host=location.hostname;
-  if(proto!=='https:'&&host!=='localhost'&&host!=='127.0.0.1'){
-    setToast(fb,'err','❌ Kamera yalnızca HTTPS üzerinde çalışır. GitHub Pages veya Netlify kullanın.');
-    return;
-  }
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    setToast(fb,'err','❌ Bu tarayıcı kamerayı desteklemiyor. Chrome veya Safari deneyin.');
+  if(typeof Html5Qrcode === 'undefined'){
+    setToast(fb,'err','❌ QR kütüphanesi yüklenemedi. Sayfayı yenileyin veya internet bağlantınızı kontrol edin.');
     return;
   }
 
-  // Tarama motoru kontrolü — jsQR henüz yüklenmediyse kısa süre bekle
-  let mode=_getDetectorMode();
-  if(!mode){
-    setToast(fb,'info','⏳ QR motoru yükleniyor, lütfen bekleyin…');
-    await new Promise(r=>setTimeout(r,2500));
-    mode=_getDetectorMode();
-  }
-  if(!mode){
-    setToast(fb,'err','❌ QR tarama motoru yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.');
-    return;
-  }
+  btnStart.disabled = true;
+  setToast(fb,'info','📷 Kamera başlatılıyor…');
 
-  btn.disabled=true;
-  setToast(fb,'info','📷 Kamera izni isteniyor…');
-
-  // Kamerayı aç
   try{
-    camStream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}
-    });
-  }catch(err){
-    // Kısıtlama hatasında daha basit constraint ile tekrar dene
-    if(err.name==='OverconstrainedError'||err.name==='ConstraintNotSatisfiedError'){
-      try{ camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}); }
-      catch(e2){ camStream=null; }
+    _html5QrScanner = new Html5Qrcode('qr-reader');
+    await _html5QrScanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 220, height: 220 } },
+      (decodedText) => { handleQR(decodedText); },
+      (errorMsg) => { /* tarama sürüyor, hata değil */ }
+    );
+    btnStart.style.display = 'none';
+    btnStop.style.display = 'flex';
+    setToast(fb,'info','🔍 QR kodu çerçeve içine getirin…');
+  } catch(err){
+    btnStart.disabled = false;
+    _html5QrScanner = null;
+    if(err && (err.toString().includes('NotAllowed') || err.toString().includes('Permission'))){
+      setToast(fb,'err','❌ Kamera izni reddedildi. Tarayıcı adres çubuğundaki kilit simgesinden izin verin.');
+    } else if(err && err.toString().includes('NotFound')){
+      setToast(fb,'err','❌ Kamera bulunamadı.');
+    } else {
+      setToast(fb,'err','❌ Kamera açılamadı: ' + (err.message || err));
     }
-    if(!camStream){
-      btn.disabled=false;
-      if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError'){
-        setToast(fb,'err','❌ Kamera izni reddedildi. Tarayıcı ayarlarından bu siteye kamera izni verin.');
-      }else if(err.name==='NotFoundError'){
-        setToast(fb,'err','❌ Kamera bulunamadı.');
-      }else{
-        setToast(fb,'err','❌ Kamera açılamadı: '+err.name);
-      }
-      return;
-    }
-  }
-
-  // iOS Safari için playsinline MUTLAKA srcObject'ten önce
-  video.setAttribute('playsinline','');
-  video.setAttribute('muted','');
-  video.muted=true;
-  video.srcObject=camStream;
-
-  wrap.classList.add('open');
-  btn.style.display='none';
-
-  try{ await video.play(); }catch(e){
-    // Autoplay engellenirse dokunuş bekle
-    setToast(fb,'warn','⚠️ Başlatmak için ekrana dokunun…');
-    await new Promise(r=>{
-      const go=()=>{ video.play().catch(()=>{}); r(); };
-      document.addEventListener('touchstart',go,{once:true});
-      document.addEventListener('click',go,{once:true});
-    });
-  }
-
-  setToast(fb,'info','🔍 QR kodu çerçeve içine getirin… (motor: '+(mode==='native'?'Tarayıcı built-in':'jsQR')+')');
-  scanning=true;
-  scanLoop(mode);
-}
-
-function scanLoop(mode){
-  if(!scanning) return;
-  const video=document.getElementById('qr-video');
-  const canvas=document.getElementById('qr-canvas');
-  if(!video.videoWidth||video.readyState<2){ rafId=requestAnimationFrame(()=>scanLoop(mode)); return; }
-
-  if(mode==='native'){
-    // BarcodeDetector — promise tabanlı, her 200ms bir tara
-    _barcodeDetector.detect(video).then(codes=>{
-      if(!scanning) return;
-      if(codes&&codes.length>0&&codes[0].rawValue){ handleQR(codes[0].rawValue); return; }
-      rafId=setTimeout(()=>scanLoop(mode),200);
-    }).catch(()=>{ rafId=setTimeout(()=>scanLoop(mode),200); });
-  } else {
-    // jsQR — canvas üzerinden
-    canvas.width=video.videoWidth;
-    canvas.height=video.videoHeight;
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.drawImage(video,0,0,canvas.width,canvas.height);
-    const imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-    const code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
-    if(code&&code.data){ handleQR(code.data); return; }
-    rafId=requestAnimationFrame(()=>scanLoop(mode));
   }
 }
 
-function stopCam(){
-  scanning=false;
-  if(rafId){ try{cancelAnimationFrame(rafId);}catch(e){} try{clearTimeout(rafId);}catch(e){} rafId=null; }
-  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
-  const video=document.getElementById('qr-video');
-  video.srcObject=null;
-  document.getElementById('cam-wrap').classList.remove('open');
-  const btn=document.getElementById('btn-start-scan');
-  btn.style.display='flex'; btn.disabled=false;
+async function stopQR(){
+  const btnStart = document.getElementById('btn-start-scan');
+  const btnStop = document.getElementById('btn-stop-scan');
+  if(_html5QrScanner){
+    try{ await _html5QrScanner.stop(); } catch(e){}
+    try{ _html5QrScanner.clear(); } catch(e){}
+    _html5QrScanner = null;
+  }
+  btnStop.style.display = 'none';
+  btnStart.style.display = 'flex';
+  btnStart.disabled = false;
+  document.getElementById('qr-reader').innerHTML = '';
 }
 
-function stopCam(){
-  scanning=false;
-  if(rafId){cancelAnimationFrame(rafId);rafId=null;}
-  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
-  const video=document.getElementById('qr-video');
-  video.srcObject=null;
-  document.getElementById('cam-wrap').classList.remove('open');
-  const btn=document.getElementById('btn-start-scan');
-  btn.style.display='flex'; btn.disabled=false;
-}
+async function handleQR(raw){
+  await stopQR();
+  const fb = document.getElementById('qr-fb');
+  const text = raw.toLowerCase().replace(/\s/g,'');
+  let num = null;
+  const um = text.match(/[?&]istasyon=(\d)/);
+  const wm = text.match(/istasyon(\d)/);
+  const bm = text.match(/^(\d)$/);
+  if(um) num = parseInt(um[1]);
+  else if(wm) num = parseInt(wm[1]);
+  else if(bm) num = parseInt(bm[1]);
 
-function handleQR(raw){
-  stopCam();
-  const fb=document.getElementById('qr-fb');
-  const text=raw.toLowerCase().replace(/\s/g,'');
-  let num=null;
-  const um=text.match(/[?&]istasyon=(\d)/);
-  const wm=text.match(/istasyon(\d)/);
-  const bm=text.match(/^(\d)$/);
-  if(um) num=parseInt(um[1]);
-  else if(wm) num=parseInt(wm[1]);
-  else if(bm) num=parseInt(bm[1]);
-
-  if(!num||num<1||num>6){
+  if(!num || num < 1 || num > 6){
     setToast(fb,'err','❌ Geçersiz QR Kod! Oyuna ait bir kod değil. Tekrar deneyin.');
     return;
   }
@@ -861,12 +747,12 @@ function handleQR(raw){
     setToast(fb,'info',`✓ ${num}. İstasyon zaten tamamlandı.`);
     return;
   }
-  if(num!==G.curStation){
+  if(num !== G.curStation){
     setToast(fb,'err',`⚠️ Sıradaki istasyon ${G.curStation}. Lütfen sırayla ilerleyin.`);
     return;
   }
   setToast(fb,'ok',`✅ ${num}. İstasyon doğrulandı! Yönlendiriliyorsunuz…`);
-  setTimeout(()=>openStation(num),700);
+  setTimeout(()=>openStation(num), 700);
 }
 
 function openStation(n){
