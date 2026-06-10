@@ -313,19 +313,19 @@ textarea{resize:vertical;min-height:84px}
     <div class="map-img-wrap" id="map-img-wrap">
       <div class="map-ph"><div class="ph-i">🗺️</div><p>map.png yükleniyor…</p></div>
     </div>
-    <div class="st-panel">
-      <div class="sp-hdr">📍 İstasyonlar — QR Kod ile Giriş</div>
-      <div id="st-list"></div>
-      <div class="qr-note">🔒 İstasyonlara giriş yalnızca QR kod taramayla yapılır</div>
-    </div>
-    <!-- QR SCANNER -->
-    <div class="qr-panel">
-      <h3>📷 QR Kod Tarayıcı</h3>
-      <p class="qr-desc">İstasyondaki QR kodu kameranıza okutun. Tarayıcı sizi otomatik yönlendirecektir.</p>
-      <button class="btn btn-blue" id="btn-start-scan" onclick="startQR()">📷 Kamerayı Aç &amp; QR Tara</button>
+    <!-- QR SCANNER - ÖN PLANDA -->
+    <div class="qr-panel" style="border:2px solid var(--blue);box-shadow:0 0 18px var(--blue-glow)">
+      <h3 style="font-size:16px;color:var(--blue);margin-bottom:8px">📷 QR Kod Okut — İstasyona Gir</h3>
+      <p class="qr-desc" style="color:var(--text2);margin-bottom:10px">İstasyondaki QR kodu kameraya okutun, otomatik yönlendirilirsiniz.</p>
+      <button class="btn btn-blue" id="btn-start-scan" onclick="startQR()" style="font-size:16px;padding:15px">📷 Kamerayı Aç &amp; QR Tara</button>
       <button class="btn btn-ghost" id="btn-stop-scan" onclick="stopQR()" style="display:none;margin-top:8px">✕ Kamerayı Kapat</button>
       <div id="qr-reader" style="margin-top:10px"></div>
       <div id="qr-fb" class="toast" style="margin-top:8px"></div>
+    </div>
+    <div class="st-panel">
+      <div class="sp-hdr">📍 İstasyon Sırası</div>
+      <div id="st-list"></div>
+      <div class="qr-note">🔒 İstasyonlara giriş yalnızca QR kod taramayla yapılır</div>
     </div>
   </div>
 </div>
@@ -971,8 +971,10 @@ async function downloadPDF(){
     const ctx=canvas.getContext('2d');
     ctx.scale(2,2);
 
-    // ── PAGE 1 ─────────────────────────────
+    // ── YARDIMCI FONKSİYONLAR ──────────────
     function fillRect(x,y,w,h,color){ ctx.fillStyle=color; ctx.fillRect(x,y,w,h); }
+    function rect(x,y,w,h,color,lw=1){ ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.strokeRect(x,y,w,h); }
+    function line(x1,y1,x2,y2,color='#BBBBBB',lw=0.5){ ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
     function text(str,x,y,size,color,align,font){
       ctx.font=`${font||'700'} ${size}px Inter,Arial,sans-serif`;
       ctx.fillStyle=color; ctx.textAlign=align||'left'; ctx.fillText(str,x,y);
@@ -989,129 +991,150 @@ async function downloadPDF(){
       if(line) ctx.fillText(line,x,y);
       return y;
     }
+    // base64 img çizici
+    function drawImg(src,x,y,w,h){
+      return new Promise(res=>{
+        const img=new Image(); img.onload=()=>{ ctx.drawImage(img,x,y,w,h); res(); }; img.onerror=res;
+        img.src=src;
+      });
+    }
 
-    const p1y=0;
-    // BG
-    fillRect(0,p1y,W,H,'#0D1018');
-    // Rainbow band
-    const grad=ctx.createLinearGradient(0,0,W,0);
-    grad.addColorStop(0,'#4C9EEB'); grad.addColorStop(.33,'#A78BFA');
-    grad.addColorStop(.66,'#3DD68C'); grad.addColorStop(1,'#F59E0B');
-    ctx.fillStyle=grad; ctx.fillRect(0,p1y,W,6);
-
-    // Glow circle behind star
-    const grd=ctx.createRadialGradient(W/2,p1y+75,5,W/2,p1y+75,70);
-    grd.addColorStop(0,'rgba(76,158,235,0.25)'); grd.addColorStop(1,'rgba(76,158,235,0)');
-    ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(W/2,p1y+75,70,0,Math.PI*2); ctx.fill();
-
-    // Star
-    text('★',W/2,p1y+80,36,'#F59E0B','center','900');
-
-    // Badge label
-    text('NEZAKET ELCİLERİ',W/2,p1y+115,10,'#4A5875','center','700');
-
-    // Title
-    text('Başarı Sertifikası',W/2,p1y+140,26,'#4C9EEB','center','900');
-
-    // Subtitle
-    text('Dijital Oryantiring Tamamlandı ✓',W/2,p1y+162,11,'#4A5875','center','500');
-
-    // Divider
-    ctx.strokeStyle='#263040'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(40,p1y+178); ctx.lineTo(W-40,p1y+178); ctx.stroke();
-
-    // EKİP ADI
-    text('EKİP ADI',W/2,p1y+200,9,'#4A5875','center','700');
-    text(G.teamName,W/2,p1y+228,28,'#E8EDF8','center','900');
-
-    // Members
-    const memStr=G.members.join('  •  ');
-    text(memStr,W/2,p1y+252,11,'#4C9EEB','center','600');
-
-    // Mascot
-    text(G.mascotIcon+'  '+G.mascotName,W/2,p1y+275,13,'#8A9AB8','center','600');
-
-    // Divider
-    ctx.beginPath(); ctx.moveTo(40,p1y+292); ctx.lineTo(W-40,p1y+292); ctx.stroke();
-
-    // Promise box
-    fillRect(40,p1y+305,W-80,90,'#0A2E1E');
-    ctx.strokeStyle='rgba(61,214,140,0.3)'; ctx.lineWidth=1;
-    ctx.strokeRect(40,p1y+305,W-80,90);
-    ctx.fillStyle='#3DD68C'; ctx.fillRect(40,p1y+305,3,90);
-    text('NEZAKETSÖZİMİZ',52,p1y+323,9,'#3DD68C','left','700');
-    const promise=G.data.promise||'—';
-    wrapText('"'+promise+'"',52,p1y+343,W-100,18,12,'#E8EDF8','left','600');
-
-    // Divider
-    ctx.strokeStyle='#263040';
-    ctx.beginPath(); ctx.moveTo(40,p1y+410); ctx.lineTo(W-40,p1y+410); ctx.stroke();
-
-    // Date
     const dateStr=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
-    text(dateStr,W/2,p1y+432,11,'#4A5875','center','500');
 
-    // Stamps / decoration
-    text('🏅',W-65,p1y+H-60,32,'','left');
+    // ── SAYFA 1 – SERTİFİKA (BEYAZ / BASKIYA UYGUN) ───────────────
+    const p1y=0;
+    fillRect(0,p1y,W,H,'#FFFFFF'); // Beyaz zemin
 
-    // School signature (right aligned, italic feel)
-    text('Gazi Sosyal Bilimler Lisesi',W-44,p1y+H-40,12,'#4A5875','right','600');
-    ctx.strokeStyle='#263040'; ctx.lineWidth=.6;
-    ctx.beginPath(); ctx.moveTo(W-220,p1y+H-48); ctx.lineTo(W-44,p1y+H-48); ctx.stroke();
+    // Üst dekoratif bant — ince çizgiler
+    fillRect(0,p1y,W,8,'#1A1A1A');
+    fillRect(0,p1y+8,W,3,'#555555');
 
-    // ── PAGE 2 ─────────────────────────────
+    // Logo alanı
+    text('★',W/2,p1y+55,40,'#1A1A1A','center','900');
+    text('NEZAKET ELCİLERİ',W/2,p1y+75,10,'#555555','center','700');
+    text('Başarı Sertifikası',W/2,p1y+105,28,'#1A1A1A','center','900');
+    text('Dijital Oryantiring Tamamlandı ✓',W/2,p1y+125,11,'#666666','center','500');
+
+    line(40,p1y+140,W-40,p1y+140,'#CCCCCC',1);
+
+    // EKİP BİLGİSİ
+    text('EKİP ADI',W/2,p1y+165,9,'#888888','center','700');
+    text(G.teamName,W/2,p1y+198,30,'#1A1A1A','center','900');
+    const memStr=G.members.join('  •  ');
+    text(memStr,W/2,p1y+220,11,'#333333','center','600');
+    text(G.mascotIcon+'  '+G.mascotName,W/2,p1y+240,12,'#666666','center','600');
+
+    line(40,p1y+256,W-40,p1y+256,'#CCCCCC',1);
+
+    // NEZAKET SÖZI kutusu — çerçeveli
+    fillRect(40,p1y+268,W-80,88,'#F5F5F5');
+    fillRect(40,p1y+268,3,88,'#1A1A1A');
+    rect(40,p1y+268,W-80,88,'#CCCCCC',0.8);
+    text('NEZAKETSÖZİMİZ',52,p1y+286,9,'#333333','left','700');
+    const promise=G.data.promise||'—';
+    wrapText('"'+promise+'"',52,p1y+306,W-105,18,12,'#1A1A1A','left','600');
+
+    line(40,p1y+372,W-40,p1y+372,'#CCCCCC',1);
+
+    // Tarih & okul
+    text(dateStr,W/2,p1y+393,11,'#888888','center','500');
+
+    // Onay imza kutuları
+    const bw=(W-100)/2;
+    fillRect(40,p1y+415,bw,55,'#F9F9F9'); rect(40,p1y+415,bw,55,'#CCCCCC',0.8);
+    text('Danışman Öğretmen',40+bw/2,p1y+433,9,'#888888','center','600');
+    line(55,p1y+455,40+bw-15,p1y+455,'#AAAAAA',0.8);
+    text('İmza / Kaşe',40+bw/2,p1y+466,8,'#AAAAAA','center','400');
+
+    fillRect(W-40-bw,p1y+415,bw,55,'#F9F9F9'); rect(W-40-bw,p1y+415,bw,55,'#CCCCCC',0.8);
+    text('Okul Müdürü',W-40-bw/2,p1y+433,9,'#888888','center','600');
+    line(W-40-bw+15,p1y+455,W-55,p1y+455,'#AAAAAA',0.8);
+    text('İmza / Kaşe',W-40-bw/2,p1y+466,8,'#AAAAAA','center','400');
+
+    line(40,p1y+485,W-40,p1y+485,'#CCCCCC',1);
+    text('Gazi Sosyal Bilimler Lisesi',W/2,p1y+H-18,11,'#888888','center','600');
+
+    // Alt bant
+    fillRect(0,p1y+H-8,W,8,'#1A1A1A');
+
+    // ── SAYFA 2 – AKTİVİTE ÖZETİ & FOTOĞRAFLAR ──────────────────
     const p2y=H;
-    fillRect(0,p2y,W,H,'#0D1018');
-    // subtle rainbow
-    ctx.fillStyle=grad; ctx.fillRect(0,p2y,W,4);
+    fillRect(0,p2y,W,H,'#FFFFFF');
+    fillRect(0,p2y,W,8,'#1A1A1A');
 
-    text('Ekip Aktivite Özeti',40,p2y+45,20,'#4C9EEB','left','800');
-    text('Nezaket Sahibi Akranlar – Dijital Oryantiring',40,p2y+65,10,'#4A5875','left','500');
+    text('Ekip Aktivite Özeti',40,p2y+38,18,'#1A1A1A','left','800');
+    text('Nezaket Sahibi Akranlar – Dijital Oryantiring  |  '+G.teamName,40,p2y+56,10,'#666666','left','500');
+    line(40,p2y+68,W-40,p2y+68,'#CCCCCC',1);
 
-    ctx.strokeStyle='#263040'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(40,p2y+78); ctx.lineTo(W-40,p2y+78); ctx.stroke();
-
-    // Team info
-    text(G.mascotIcon+' '+G.teamName,40,p2y+100,14,'#E8EDF8','left','700');
-    text(G.members.join(' · '),40,p2y+118,10,'#8A9AB8','left','500');
-
-    ctx.beginPath(); ctx.moveTo(40,p2y+130); ctx.lineTo(W-40,p2y+130); ctx.stroke();
-
-    // Summary rows
+    // İstasyon özeti — sol sütun
     const sumRows=[
-      {ic:'📸',lb:'1. İstasyon – Tanışma & Fotoğraf',vl:G.data.photo1?'Fotoğraf yüklendi':'Tamamlandı',extra:null},
-      {ic:'🔮',lb:'2. İstasyon – Bilmece',vl:G.data.riddle||'—',extra:null},
-      {ic:'🎯',lb:'3. İstasyon – Kelime Oyunu',vl:'Tamamlandı',extra: G.data.s3WrongWords?.length?'Not: Bazı kelimeler yanlış yerleştirildi ('+G.data.s3WrongWords.join(', ')+')':null},
-      {ic:'🔐',lb:'4. İstasyon – Şifre Çözümü',vl:G.data.cipher||'—',extra:'Doğru cevap: "Nezaket anlamaktır, desteklemek güç verir."'},
-      {ic:'⚖️',lb:'5. İstasyon – Kriz Masası',vl:G.data.scenario?G.data.scenario+' şıkkı seçildi':'—',extra:G.data.scenario==='C'?'✓ En uygun akran nezaketi davranışı':'Optimal seçenek: C şıkkı'},
-      {ic:'🏆',lb:'6. İstasyon – Nezaket Sözü',vl:G.data.promise||'—',extra:null},
+      {ic:'📸',lb:'1. İstasyon – Tanışma & Fotoğraf',vl:G.data.photo1?'Fotoğraf çekildi ✓':'Tamamlandı'},
+      {ic:'🔮',lb:'2. İstasyon – Bilmece',vl:G.data.riddle||'—'},
+      {ic:'🎯',lb:'3. İstasyon – Kelime Oyunu',vl:G.data.s3WrongWords?.length?'Bazı hatalar: '+G.data.s3WrongWords.join(', '):'Tüm kelimeler doğru ✓'},
+      {ic:'🔐',lb:'4. İstasyon – Şifre',vl:(G.data.cipher||'—')+' → Doğru: "Nezaket anlamaktır"'},
+      {ic:'⚖️',lb:'5. İstasyon – Kriz',vl:G.data.scenario?G.data.scenario+' şıkkı'+(G.data.scenario==='C'?' ✓ (En iyi)':' (Optimal: C)'):'—'},
+      {ic:'🏆',lb:'6. İstasyon – Söz',vl:G.data.promise||'—'},
     ];
 
-    let sy=p2y+148;
-    sumRows.forEach((r,i)=>{
-      fillRect(40,sy-16,W-80,r.extra?60:44,'#141926');
-      ctx.strokeStyle='#263040'; ctx.lineWidth=.5; ctx.strokeRect(40,sy-16,W-80,r.extra?60:44);
-      text(r.ic,52,sy+2,16,'','left');
-      text(r.lb,76,sy,10,'#4A5875','left','700');
-      const finalY=wrapText(r.vl,76,sy+16,W-130,15,12,'#8A9AB8','left','600');
-      if(r.extra){ wrapText(r.extra,76,finalY+16,W-130,13,10,'#3DD68C','left','600'); sy+=r.extra?76:52; }
-      else sy+=52;
+    let sy=p2y+82;
+    sumRows.forEach((r)=>{
+      fillRect(40,sy,W-80,36,'#F8F8F8');
+      rect(40,sy,W-80,36,'#E0E0E0',0.6);
+      fillRect(40,sy,3,36,'#1A1A1A');
+      text(r.lb,52,sy+13,9,'#555555','left','700');
+      wrapText(r.vl,52,sy+26,W-108,13,10,'#1A1A1A','left','600');
+      sy+=40;
     });
 
-    ctx.beginPath(); ctx.moveTo(40,sy+8); ctx.lineTo(W-40,sy+8); ctx.stroke();
-    text('Gazi Sosyal Bilimler Lisesi',W-44,p2y+H-40,11,'#4A5875','right','600');
-    text(dateStr,40,p2y+H-40,11,'#4A5875','left','500');
+    // FOTOĞRAFLAR BÖLÜMÜ
+    sy+=12;
+    line(40,sy,W-40,sy,'#CCCCCC',1);
+    sy+=16;
+    text('📸  Ekip Fotoğrafları',40,sy,13,'#1A1A1A','left','800');
+    sy+=14;
+    line(40,sy,W-40,sy,'#CCCCCC',0.5);
+    sy+=10;
+
+    // Her iki fotoğrafı da çiz (photo1 = tanışma, photo6 = 6. istasyon varsa)
+    const photos=[];
+    if(G.data.photo1) photos.push({src:G.data.photo1,label:'1. İstasyon – Tanışma Fotoğrafı'});
+    if(G.data.photo6) photos.push({src:G.data.photo6,label:'6. İstasyon – Nezaket Anı'});
+
+    if(photos.length===0){
+      fillRect(40,sy,W-80,50,'#F5F5F5'); rect(40,sy,W-80,50,'#DDDDDD',0.8);
+      text('Fotoğraf yüklenmedi',W/2,sy+30,11,'#AAAAAA','center','500');
+      sy+=58;
+    } else {
+      // Fotoğraflar yan yana (max 2)
+      const cols=photos.length; const imgW=(W-80-(cols-1)*10)/cols; const imgH=Math.min(imgW*0.65,100);
+      for(let i=0;i<photos.length;i++){
+        const ix=40+i*(imgW+10);
+        await drawImg(photos[i].src,ix,sy,imgW,imgH);
+        rect(ix,sy,imgW,imgH,'#CCCCCC',0.6);
+        text(photos[i].label,ix,sy+imgH+11,8,'#666666','left','600');
+      }
+      sy+=imgH+22;
+    }
+
+    line(40,sy+4,W-40,sy+4,'#CCCCCC',1);
+    text('Gazi Sosyal Bilimler Lisesi',W/2,p2y+H-18,11,'#888888','center','600');
+    text(dateStr,40,p2y+H-18,11,'#888888','left','500');
+    fillRect(0,p2y+H-8,W,8,'#1A1A1A');
 
     // ── EXPORT ─────────────────────────────
-    // Slice page 1 and page 2 from canvas
-    // jsPDF adds images — load it dynamically
-    const jsPDFScript=document.createElement('script');
-    jsPDFScript.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-    await new Promise((res,rej)=>{
-      if(window.jspdf){ res(); return; }
-      jsPDFScript.onload=res; jsPDFScript.onerror=rej;
-      document.head.appendChild(jsPDFScript);
-    });
+    if(!window.jspdf){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+        s.onload=res; s.onerror=()=>{
+          const s2=document.createElement('script');
+          s2.src='https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
+          s2.onload=res; s2.onerror=rej;
+          document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+      });
+    }
 
     const {jsPDF}=window.jspdf;
     const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'a4'});
