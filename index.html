@@ -697,8 +697,11 @@ async function startCam(){
     setToast(fb,'err','❌ jsQR kütüphanesi yüklenemedi. İnternet bağlantınızı kontrol edin.');
     return;
   }
-  // Check HTTPS / localhost
-  if(location.protocol!=='https:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){
+  // Check HTTPS / localhost (file:// protokolünde de çalışabilir ama kamera engellenir, uyar)
+  const proto=location.protocol;
+  const host=location.hostname;
+  const isSecure=proto==='https:'||host==='localhost'||host==='127.0.0.1'||proto==='file:';
+  if(!isSecure){
     setToast(fb,'err','❌ Kamera yalnızca HTTPS üzerinde çalışır. Siteyi HTTPS ile yayınlayın (GitHub Pages, Netlify vb.)');
     return;
   }
@@ -717,22 +720,45 @@ async function startCam(){
   }catch(err){
     btn.disabled=false;
     if(err.name==='NotAllowedError'||err.name==='PermissionDeniedError'){
-      setToast(fb,'err','❌ Kamera izni reddedildi. Tarayıcı adres çubuğundaki kilit ikonundan izin verin.');
+      setToast(fb,'err','❌ Kamera izni reddedildi. Tarayıcı ayarlarından bu siteye kamera izni verin.');
     }else if(err.name==='NotFoundError'){
       setToast(fb,'err','❌ Kamera bulunamadı. Cihazınızda kamera var mı?');
+    }else if(err.name==='OverconstrainedError'){
+      // Retry with simpler constraints
+      try{
+        camStream=await navigator.mediaDevices.getUserMedia({video:true});
+      }catch(err2){
+        setToast(fb,'err','❌ Kamera açılamadı: '+err2.message);
+        return;
+      }
     }else{
       setToast(fb,'err','❌ Kamera açılamadı: '+err.message);
+      return;
     }
-    return;
+    if(!camStream) return;
   }
 
-  video.srcObject=camStream;
+  // iOS Safari için: playsinline ve muted MUTLAKA srcObject'ten önce set edilmeli
   video.setAttribute('playsinline','');
-  // Force play
-  try{ await video.play(); }catch(e){}
+  video.setAttribute('muted','');
+  video.muted=true;
+  video.srcObject=camStream;
 
   wrap.classList.add('open');
   btn.style.display='none';
+  setToast(fb,'info','📷 Kamera başlatılıyor…');
+
+  // play() promise tabanlı — hata varsa göster
+  try{
+    await video.play();
+  }catch(e){
+    // Autoplay policy engellediyse kullanıcı etkileşimiyle tekrar dene
+    setToast(fb,'warn','⚠️ Otomatik başlatma engellendi, ekrana dokunun…');
+    const resume=()=>{ video.play().catch(()=>{}); document.removeEventListener('touchstart',resume); document.removeEventListener('click',resume); };
+    document.addEventListener('touchstart',resume,{once:true});
+    document.addEventListener('click',resume,{once:true});
+  }
+
   setToast(fb,'info','🔍 QR kodu çerçeve içine getirin…');
   scanning=true;
   scanLoop();
@@ -743,7 +769,7 @@ function scanLoop(){
   const video=document.getElementById('qr-video');
   const canvas=document.getElementById('qr-canvas');
 
-  if(video.readyState===video.HAVE_ENOUGH_DATA&&video.videoWidth>0){
+  if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0){
     canvas.width=video.videoWidth;
     canvas.height=video.videoHeight;
     const ctx=canvas.getContext('2d',{willReadFrequently:true});
