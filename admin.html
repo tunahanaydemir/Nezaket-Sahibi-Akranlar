@@ -40,9 +40,9 @@ h1{font-size:24px;font-weight:900;margin-bottom:4px;text-align:center;letter-spa
 .sc-hdr-sub{font-size:12px;color:var(--text2);margin-top:2px}
 .sc-body{padding:20px}
 
-/* CAMERA SELECTOR / ERGONOMI */
+/* CAMERA SELECTOR */
 .selector-wrapper{margin-bottom:12px}
-.select-css{display:block;width:100%;font-size:14px;font-family:var(--font);font-weight:600;color:var(--text);padding:12px;width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:var(--rs);background-color:var(--bg3);appearance:none;cursor:pointer}
+.select-css{display:block;width:100%;font-size:14px;font-family:var(--font);font-weight:600;color:var(--text);padding:12px;box-sizing:border-box;border:1px solid var(--border);border-radius:var(--rs);background-color:var(--bg3);appearance:none;cursor:pointer}
 .select-css:focus{outline:none;border-color:var(--blue)}
 
 #reader{width:100%;border-radius:var(--rs);overflow:hidden;background:#000;min-height:240px;display:flex;align-items:center;justify-content:center;position:relative}
@@ -65,7 +65,6 @@ h1{font-size:24px;font-weight:900;margin-bottom:4px;text-align:center;letter-spa
 .btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(59,130,246,.2)}
 .btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
 .btn-ghost:hover{border-color:var(--text2);color:var(--text)}
-.btn-orange{background:var(--orange);color:#2d1a00}
 .gap{height:12px}
 
 /* SONUÇ KARTI */
@@ -76,7 +75,7 @@ h1{font-size:24px;font-weight:900;margin-bottom:4px;text-align:center;letter-spa
 .rc-team{font-size:28px;font-weight:900;margin-bottom:4px;letter-spacing:-0.5px}
 .rc-date{font-size:12px;color:var(--text2);margin-bottom:14px}
 .rc-members{font-size:14px;color:var(--text);font-weight:600;margin-bottom:8px;background:var(--bg3);padding:10px 14px;border-radius:var(--rs);border:1px solid var(--border)}
-.rc-promise{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.6;position:relative}
+.rc-promise{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.6}
 .rc-promise strong{color:var(--text);display:block;margin-bottom:5px;font-size:11px;text-transform:uppercase;letter-spacing:.8px}
 .btns{display:flex;flex-direction:column;gap:10px}
 
@@ -114,8 +113,8 @@ h1{font-size:24px;font-weight:900;margin-bottom:4px;text-align:center;letter-spa
 <div id="authPanel">
   <div class="auth-card">
     <div class="auth-icon">🛡️</div>
-    <div class="auth-title">Erişim Kontrolü</div>
-    <div class="auth-sub">Devam etmek için sistem kodunu girin.</div>
+    <div class="auth-title">Admin Panel</div>
+    <div class="auth-sub">Enter the passkey</div>
     <input type="password" id="authInput" class="auth-input" placeholder="••••" maxlength="8" oninput="checkAuth(this)">
   </div>
 </div>
@@ -157,8 +156,6 @@ h1{font-size:24px;font-weight:900;margin-bottom:4px;text-align:center;letter-spa
       <div class="rc-promise"><strong>Nezaket Sözü</strong><span id="rc-promise">—</span></div>
       <div class="btns">
         <button class="btn btn-green" onclick="printCert()">🖨️ &nbsp;Sertifikayı Yazdır / Önizle</button>
-        <button class="btn btn-orange" onclick="downloadPDF()">⬇️ &nbsp;PDF İndir</button>
-        <button class="btn btn-ghost" onclick="resetScan()">🔄 &nbsp;Yeni Tarama Yap</button>
       </div>
     </div>
   </div>
@@ -196,17 +193,15 @@ let history = JSON.parse(localStorage.getItem('nesak-admin-history')||'[]');
 function checkAuth(input) {
   if(input.value.toLowerCase() === 'xlyn') {
     document.getElementById('authPanel').classList.add('hidden');
-    // Giriş yapıldıktan sonra kameraları tara
     prepareCameras();
   }
 }
 
 // ═══════════════════════════════
-// KAMERA YÖNETİMİ (ÇÖZÜM)
+// KAMERA YÖNETİMİ
 // ═══════════════════════════════
 async function prepareCameras() {
   try {
-    // İlk izin tetiklemesi için geçici nesne oluşturuyoruz
     const initialCameras = await Html5Qrcode.getCameras();
     if(!initialCameras || initialCameras.length === 0) {
       setStatus('Kamera bulunamadı veya izin verilmedi.', 'err');
@@ -217,12 +212,10 @@ async function prepareCameras() {
     const selectEl = document.getElementById('camRegistry');
     selectEl.innerHTML = '';
     
-    // Kameraları listeye basıyoruz
     availableCameras.forEach((cam, index) => {
       const opt = document.createElement('option');
       opt.value = cam.id;
       opt.textContent = cam.label || `Kamera ${index + 1}`;
-      // Varsayılan olarak arka kamerayı seçmeye çalış
       if(cam.label.toLowerCase().includes('back') || cam.label.toLowerCase().includes('arka')) {
         opt.selected = true;
       }
@@ -240,7 +233,6 @@ function onCameraChange() {
   const selectEl = document.getElementById('camRegistry');
   selectedCameraId = selectEl.value;
   if(scanning) {
-    // Tarama yapılıyorsa anlık olarak kamerayı kapatıp yenisiyle aç
     stopScan().then(() => startScan());
   }
 }
@@ -268,7 +260,7 @@ async function startScan(){
       selectedCameraId,
       { fps: 12, qrbox: { width: 250, height: 250 } },
       onScanSuccess,
-      () => {}
+      () => {} // Geçersiz QR okunduğunda hiçbir şey yapma, kamera akışı devam etsin
     );
     scanning = true;
     setStatus('QR Kod Hedefte Bekleniyor...','scan');
@@ -291,18 +283,20 @@ async function stopScan(){
 }
 
 function onScanSuccess(decoded){
-  stopScan();
   try{
     const data = JSON.parse(decoded);
-    if(data.type !== 'nesak-cert') throw new Error('Bu QR kedi, Nezaket Akranlar formatında değil.');
+    // Eğer gelen veri bizim formatta değilse sessizce geç, kamerayı KAPATMA!
+    if(data.type !== 'nesak-cert') return; 
+    
+    // Geçerli veri geldiyse akışı durdur ve işlemleri yap
+    stopScan();
     currentData = data;
     showResult(data);
     addToHistory(data);
     setStatus('✓ QR Kod Başarıyla Doğrulandı!','ok');
   }catch(e){
-    setStatus('Hata: '+e.message,'err');
-    // Ergonomik hata döngüsü: 2 saniye sonra otomatik yeniden başlar
-    setTimeout(()=>startScan(), 2000);
+    // JSON parse hatası veya herhangi bir geçersiz kod gelirse tetik vermiyoruz, kamera açık kalıyor.
+    console.log("Geçersiz QR algılandı, işlem yapılmadı.");
   }
 }
 
@@ -318,14 +312,6 @@ function showResult(d){
   const rc = document.getElementById('resultCard');
   rc.classList.add('show');
   rc.scrollIntoView({behavior:'smooth', block:'center'});
-}
-
-function resetScan(){
-  currentData = null;
-  document.getElementById('resultCard').classList.remove('show');
-  setStatus('Yeni tarama için kamera başlatılıyor...','scan');
-  document.getElementById('reader').innerHTML='';
-  startScan();
 }
 
 // ═══════════════════════════════
@@ -447,14 +433,12 @@ async function doDownload(){
   doc.save(fn);
 }
 
-function downloadPDF(){ doDownload(); }
 function closeOverlay(){ document.getElementById('printOv').classList.remove('show'); }
 
 // ═══════════════════════════════
 // GEÇMİŞ YÖNETİMİ
 // ═══════════════════════════════
 function addToHistory(d){
-  // Çift kayıt kontrolü
   if(history.some(h => h.team === d.team && h.date === d.date)) return;
   
   history.unshift({team:d.team, date:d.date, members:d.members, promise:d.promise, scannedAt:new Date().toLocaleTimeString('tr-TR')});
@@ -492,7 +476,6 @@ function clearHistory(){
 
 document.getElementById('printOv').addEventListener('click',function(e){if(e.target===this)closeOverlay();});
 
-// Sayfa ilk açıldığında geçmiş listesini render et (Kamera akışı auth'tan sonra)
 renderHistory();
 </script>
 </body>
