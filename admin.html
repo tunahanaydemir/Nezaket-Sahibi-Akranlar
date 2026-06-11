@@ -9,136 +9,171 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0D1018;--bg2:#141926;--bg3:#1C2333;--border:#263040;--border2:#334060;
-  --blue:#4C9EEB;--blue-dim:#152840;--green:#3DD68C;--green-dim:#0A2E1E;
-  --red:#EF4444;--red-dim:#2D0A0A;--orange:#F59E0B;
-  --text:#E8EDF8;--text2:#8A9AB8;--text3:#4A5875;
-  --r:14px;--rs:10px;--font:'Inter',sans-serif;
+  --bg:#080B11;--bg2:#101422;--bg3:#1A2035;--border:#242D46;--border2:#364468;
+  --blue:#3B82F6;--blue-dim:#132548;--green:#10B981;--green-dim:#0B2F24;
+  --red:#EF4444;--red-dim:#311212;--orange:#F59E0B;
+  --text:#F3F4F6;--text2:#9CA3AF;--text3:#4B5563;
+  --r:16px;--rs:12px;--font:'Inter',sans-serif;
 }
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 40px}
-h1{font-size:22px;font-weight:900;margin-bottom:4px;text-align:center}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 60px}
+
+/* GİRİŞ EKRANI (AUTH) */
+#authPanel{position:fixed;inset:0;background:var(--bg);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;transition:opacity .4s ease,visibility .4s}
+#authPanel.hidden{opacity:0;visibility:hidden}
+.auth-card{width:100%;max-width:360px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.5)}
+.auth-icon{font-size:40px;margin-bottom:12px;display:inline-block;animation:pulse 2s infinite}
+.auth-title{font-size:20px;font-weight:900;margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+.auth-input{width:100%;padding:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);color:#fff;font-family:var(--font);font-size:16px;text-align:center;font-weight:700;letter-spacing:4px;margin-bottom:14px;transition:border-color .2s}
+.auth-input:focus{outline:none;border-color:var(--blue)}
+
+/* GENEL DÜZEN */
+#mainContent{width:100%;max-width:480px;display:flex;flex-direction:column;align-items:center}
+h1{font-size:24px;font-weight:900;margin-bottom:4px;text-align:center;letter-spacing:-0.5px}
 .sub{font-size:13px;color:var(--text2);margin-bottom:24px;text-align:center}
 
-/* SCANNER CARD */
-.scanner-card{width:100%;max-width:480px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
-.sc-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+/* CARDS */
+.card{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+.sc-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
 .sc-hdr-icon{font-size:22px}
 .sc-hdr-title{font-size:15px;font-weight:800}
-.sc-hdr-sub{font-size:12px;color:var(--text2);margin-top:1px}
-.sc-body{padding:18px}
-#reader{width:100%;border-radius:var(--rs);overflow:hidden;background:#000;min-height:220px;display:flex;align-items:center;justify-content:center}
-#reader video{border-radius:var(--rs)}
+.sc-hdr-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.sc-body{padding:20px}
+
+/* CAMERA SELECTOR / ERGONOMI */
+.selector-wrapper{margin-bottom:12px}
+.select-css{display:block;width:100%;font-size:14px;font-family:var(--font);font-weight:600;color:var(--text);padding:12px;width:100%;box-sizing:border-box;border:1px solid var(--border);border-radius:var(--rs);background-color:var(--bg3);appearance:none;cursor:pointer}
+.select-css:focus{outline:none;border-color:var(--blue)}
+
+#reader{width:100%;border-radius:var(--rs);overflow:hidden;background:#000;min-height:240px;display:flex;align-items:center;justify-content:center;position:relative}
+#reader video{border-radius:var(--rs);object-fit: cover}
 
 /* DURUM */
-.status{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:var(--rs);font-size:13px;font-weight:600;margin-top:14px}
+.status{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:var(--rs);font-size:13px;font-weight:700;margin-top:14px}
 .st-idle{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
-.st-ok{background:var(--green-dim);color:var(--green);border:1px solid rgba(61,214,140,.28)}
-.st-err{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.28)}
-.st-scan{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(76,158,235,.28);animation:blink 1.2s infinite}
+.st-ok{background:var(--green-dim);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.st-err{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.st-scan{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,.25);animation:blink 1.2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 
 /* BUTONLAR */
-.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:13px 18px;border:none;border-radius:var(--rs);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:transform .12s,opacity .15s}
-.btn:active{transform:scale(.97)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 20px;border:none;border-radius:var(--rs);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:transform .1s,opacity .15s}
+.btn:active{transform:scale(.96)}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.btn-green{background:var(--green);color:#061a0f;box-shadow:0 4px 18px rgba(61,214,140,.28)}
-.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 18px rgba(76,158,235,.28)}
-.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:14px}
+.btn-green{background:var(--green);color:#022c1e;box-shadow:0 4px 14px rgba(16,185,129,.2)}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(59,130,246,.2)}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
 .btn-ghost:hover{border-color:var(--text2);color:var(--text)}
-.btn-orange{background:var(--orange);color:#1a0d00}
-.gap{height:10px}
+.btn-orange{background:var(--orange);color:#2d1a00}
+.gap{height:12px}
 
 /* SONUÇ KARTI */
-.result-card{width:100%;max-width:480px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:18px;display:none}
-.result-card.show{display:block}
-.rc-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-dim);color:var(--green);border:1px solid rgba(61,214,140,.28);font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:14px}
-.rc-team{font-size:26px;font-weight:900;margin-bottom:3px}
-.rc-date{font-size:12px;color:var(--text2);margin-bottom:10px}
-.rc-members{font-size:13px;color:var(--text);font-weight:600;margin-bottom:6px}
-.rc-promise{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:11px 14px;font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5}
-.rc-promise strong{color:var(--text);display:block;margin-bottom:3px;font-size:11px;text-transform:uppercase;letter-spacing:.6px}
-.btns{display:flex;flex-direction:column;gap:9px}
+.result-card{display:none;border:1px solid var(--border2)}
+.result-card.show{display:block;animation:slideUp 0.3s ease-out}
+@keyframes slideUp { from{transform:translateY(15px);opacity:0} to{transform:translateY(0);opacity:1} }
+.rc-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-dim);color:var(--green);border:1px solid rgba(16,185,129,.25);font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:16px}
+.rc-team{font-size:28px;font-weight:900;margin-bottom:4px;letter-spacing:-0.5px}
+.rc-date{font-size:12px;color:var(--text2);margin-bottom:14px}
+.rc-members{font-size:14px;color:var(--text);font-weight:600;margin-bottom:8px;background:var(--bg3);padding:10px 14px;border-radius:var(--rs);border:1px solid var(--border)}
+.rc-promise{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.6;position:relative}
+.rc-promise strong{color:var(--text);display:block;margin-bottom:5px;font-size:11px;text-transform:uppercase;letter-spacing:.8px}
+.btns{display:flex;flex-direction:column;gap:10px}
 
 /* GEÇMİŞ */
-.history-card{width:100%;max-width:480px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-top:20px;overflow:hidden}
-.hc-hdr{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:flex;justify-content:space-between;align-items:center}
-.hc-hdr span{font-size:11px;color:var(--text3);font-weight:500;text-transform:none;letter-spacing:0;cursor:pointer}
+.hc-hdr{padding:14px 20px;border-bottom:1px solid var(--border);font-size:12px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.hc-hdr span{font-size:12px;color:var(--text3);font-weight:600;text-transform:none;letter-spacing:0;cursor:pointer;transition:color .2s}
 .hc-hdr span:hover{color:var(--red)}
-.hist-row{padding:11px 16px;border-bottom:1px solid rgba(38,48,64,.5);cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:12px}
+.hist-row{padding:14px 20px;border-bottom:1px solid rgba(36,45,70,.5);cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:14px}
 .hist-row:last-child{border-bottom:none}
 .hist-row:hover{background:var(--bg3)}
-.hist-icon{font-size:20px}
-.hist-name{font-size:14px;font-weight:700}
-.hist-meta{font-size:11px;color:var(--text3);margin-top:1px}
-.hist-empty{padding:22px;text-align:center;color:var(--text3);font-size:13px}
+.hist-icon{font-size:22px}
+.hist-name{font-size:15px;font-weight:700}
+.hist-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.hist-empty{padding:30px;text-align:center;color:var(--text3);font-size:14px}
 
 /* OVERLAY PRINT */
-.print-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9000;flex-direction:column;gap:14px}
+.print-ov{position:fixed;inset:0;background:rgba(4,6,10,.9);display:none;align-items:center;justify-content:center;z-index:9000;flex-direction:column;gap:16px;padding:20px}
 .print-ov.show{display:flex}
-.print-ov canvas{border-radius:var(--rs);box-shadow:0 8px 40px rgba(0,0,0,.6);max-width:90vw;max-height:75vh;object-fit:contain}
-.print-ov-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.pov-btn{padding:11px 22px;border:none;border-radius:var(--rs);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.print-ov canvas{border-radius:var(--rs);box-shadow:0 20px 60px rgba(0,0,0,.8);max-width:100%;max-height:70vh;object-fit:contain}
+.print-ov-btns{display:flex;gap:12px;width:100%;max-width:400px;justify-content:center}
+.pov-btn{flex:1;padding:14px;border:none;border-radius:var(--rs);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s;text-align:center}
 .pov-btn:hover{opacity:.85}
 
 /* PRINT MEDIA */
 @media print{
   body > *:not(#print-area){display:none!important}
   #print-area{display:block!important;position:fixed;inset:0}
-  #print-area canvas,#print-area img{width:100%;height:auto;page-break-after:avoid}
+  #print-area canvas,#print-area img{width:100%;height:auto}
 }
 #print-area{display:none}
 </style>
 </head>
 <body>
 
-<h1>🛡️ Admin Paneli</h1>
-<p class="sub">Nezaket Sahibi Akranlar — Sertifika Doğrulama</p>
+<div id="authPanel">
+  <div class="auth-card">
+    <div class="auth-icon">🛡️</div>
+    <div class="auth-title">Erişim Kontrolü</div>
+    <div class="auth-sub">Devam etmek için sistem kodunu girin.</div>
+    <input type="password" id="authInput" class="auth-input" placeholder="••••" maxlength="8" oninput="checkAuth(this)">
+  </div>
+</div>
 
-<!-- SCANNER -->
-<div class="scanner-card">
-  <div class="sc-hdr">
-    <div class="sc-hdr-icon">📷</div>
-    <div>
-      <div class="sc-hdr-title">QR Kod Okuyucu</div>
-      <div class="sc-hdr-sub">Kamerayı QR koduna doğrultun</div>
+<div id="mainContent">
+  <h1>🛡️ Admin Paneli</h1>
+  <p class="sub">Nezaket Sahibi Akranlar — Sertifika Doğrulama</p>
+
+  <div class="card">
+    <div class="sc-hdr">
+      <div class="sc-hdr-icon">📷</div>
+      <div>
+        <div class="sc-hdr-title">QR Kod Okuyucu</div>
+        <div class="sc-hdr-sub">Kamerayı seçip başlatın</div>
+      </div>
+    </div>
+    <div class="sc-body">
+      <div class="selector-wrapper">
+        <select id="camRegistry" class="select-css" onchange="onCameraChange()">
+          <option value="">🔄 Kameralar yükleniyor...</option>
+        </select>
+      </div>
+      
+      <div id="reader"></div>
+      <div id="status" class="status st-idle">⬤ &nbsp;Kamera listesi hazırlanıyor...</div>
+      <div class="gap"></div>
+      <button class="btn btn-blue" id="startBtn" onclick="startScan()">📷 &nbsp;Kamerayı Başlat</button>
+      <div class="gap"></div>
+      <button class="btn btn-ghost" id="stopBtn" onclick="stopScan()" disabled>⏹ &nbsp;Kamerayı Durdur</button>
     </div>
   </div>
-  <div class="sc-body">
-    <div id="reader"></div>
-    <div id="status" class="status st-idle">⬤ &nbsp;Kamera bekleniyor…</div>
-    <div class="gap"></div>
-    <button class="btn btn-blue" id="startBtn" onclick="startScan()">📷 &nbsp;Kamerayı Başlat</button>
-    <div class="gap"></div>
-    <button class="btn btn-ghost" id="stopBtn" onclick="stopScan()" disabled>⏹ &nbsp;Durdur</button>
+
+  <div class="card result-card" id="resultCard">
+    <div class="sc-body">
+      <div class="rc-badge">✓ &nbsp;SERTİFİKA DOĞRULANDI</div>
+      <div class="rc-team" id="rc-team">—</div>
+      <div class="rc-date" id="rc-date">—</div>
+      <div class="rc-members" id="rc-members">—</div>
+      <div class="rc-promise"><strong>Nezaket Sözü</strong><span id="rc-promise">—</span></div>
+      <div class="btns">
+        <button class="btn btn-green" onclick="printCert()">🖨️ &nbsp;Sertifikayı Yazdır / Önizle</button>
+        <button class="btn btn-orange" onclick="downloadPDF()">⬇️ &nbsp;PDF İndir</button>
+        <button class="btn btn-ghost" onclick="resetScan()">🔄 &nbsp;Yeni Tarama Yap</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="hc-hdr">📋 Son Okutulan Ekipler <span onclick="clearHistory()">Temizle</span></div>
+    <div id="historyList"><div class="hist-empty">Henüz QR okutulmadı</div></div>
   </div>
 </div>
 
-<!-- SONUÇ -->
-<div class="result-card" id="resultCard">
-  <div class="rc-badge">✓ &nbsp;SERTİFİKA DOĞRULANDI</div>
-  <div class="rc-team" id="rc-team">—</div>
-  <div class="rc-date" id="rc-date">—</div>
-  <div class="rc-members" id="rc-members">—</div>
-  <div class="rc-promise"><strong>Nezaket Sözü</strong><span id="rc-promise">—</span></div>
-  <div class="btns">
-    <button class="btn btn-green" onclick="printCert()">🖨️ &nbsp;Sertifikayı Yazdır / PDF Aç</button>
-    <button class="btn btn-orange" onclick="downloadPDF()">⬇️ &nbsp;PDF İndir</button>
-    <button class="btn btn-ghost" onclick="resetScan()">🔄 &nbsp;Yeni QR Okut</button>
-  </div>
-</div>
-
-<!-- GEÇMİŞ -->
-<div class="history-card" id="historyCard">
-  <div class="hc-hdr">📋 Son Okutulanlar <span onclick="clearHistory()">Temizle</span></div>
-  <div id="historyList"><div class="hist-empty">Henüz QR okutulmadı</div></div>
-</div>
-
-<!-- YAZDIR OVERLAY -->
 <div class="print-ov" id="printOv">
   <canvas id="previewCanvas"></canvas>
   <div class="print-ov-btns">
-    <button class="pov-btn" style="background:var(--green);color:#061a0f" onclick="doPrint()">🖨️ Yazdır</button>
-    <button class="pov-btn" style="background:var(--blue);color:#fff" onclick="doDownload()">⬇️ PDF İndir</button>
+    <button class="pov-btn" style="background:var(--green);color:#022c1e" onclick="doPrint()">🖨️ Yazdır</button>
+    <button class="pov-btn" style="background:var(--blue);color:#fff" onclick="doDownload()">⬇️ PDF</button>
     <button class="pov-btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border2)" onclick="closeOverlay()">✕ Kapat</button>
   </div>
 </div>
@@ -146,16 +181,70 @@ h1{font-size:22px;font-weight:900;margin-bottom:4px;text-align:center}
 
 <script>
 // ═══════════════════════════════
-// STATE
+// STATE & CONFIG
 // ═══════════════════════════════
 let scanner = null;
 let scanning = false;
 let currentData = null;
+let availableCameras = [];
+let selectedCameraId = null;
 let history = JSON.parse(localStorage.getItem('nesak-admin-history')||'[]');
 
 // ═══════════════════════════════
-// SCANNER
+// GİRİŞ KONTROLÜ (XLYN)
 // ═══════════════════════════════
+function checkAuth(input) {
+  if(input.value.toLowerCase() === 'xlyn') {
+    document.getElementById('authPanel').classList.add('hidden');
+    // Giriş yapıldıktan sonra kameraları tara
+    prepareCameras();
+  }
+}
+
+// ═══════════════════════════════
+// KAMERA YÖNETİMİ (ÇÖZÜM)
+// ═══════════════════════════════
+async function prepareCameras() {
+  try {
+    // İlk izin tetiklemesi için geçici nesne oluşturuyoruz
+    const initialCameras = await Html5Qrcode.getCameras();
+    if(!initialCameras || initialCameras.length === 0) {
+      setStatus('Kamera bulunamadı veya izin verilmedi.', 'err');
+      return;
+    }
+    
+    availableCameras = initialCameras;
+    const selectEl = document.getElementById('camRegistry');
+    selectEl.innerHTML = '';
+    
+    // Kameraları listeye basıyoruz
+    availableCameras.forEach((cam, index) => {
+      const opt = document.createElement('option');
+      opt.value = cam.id;
+      opt.textContent = cam.label || `Kamera ${index + 1}`;
+      // Varsayılan olarak arka kamerayı seçmeye çalış
+      if(cam.label.toLowerCase().includes('back') || cam.label.toLowerCase().includes('arka')) {
+        opt.selected = true;
+      }
+      selectEl.appendChild(opt);
+    });
+
+    selectedCameraId = selectEl.value;
+    setStatus('Kameralar hazır. Seçiminizi yapıp başlatın.', 'idle');
+  } catch (e) {
+    setStatus('Kamera erişim hatası: ' + e.message, 'err');
+  }
+}
+
+function onCameraChange() {
+  const selectEl = document.getElementById('camRegistry');
+  selectedCameraId = selectEl.value;
+  if(scanning) {
+    // Tarama yapılıyorsa anlık olarak kamerayı kapatıp yenisiyle aç
+    stopScan().then(() => startScan());
+  }
+}
+
 function setStatus(msg, type='idle'){
   const el = document.getElementById('status');
   el.className = 'status st-'+type;
@@ -164,23 +253,25 @@ function setStatus(msg, type='idle'){
 
 async function startScan(){
   if(scanning) return;
+  if(!selectedCameraId) {
+    setStatus('Lütfen önce listeden geçerli bir kamera seçin.', 'err');
+    return;
+  }
+  
   document.getElementById('startBtn').disabled = true;
   document.getElementById('stopBtn').disabled = false;
-  setStatus('Kamera açılıyor…','scan');
+  setStatus('Kamera akışı başlatılıyor...','scan');
+  
   try{
     scanner = new Html5Qrcode('reader');
-    const cameras = await Html5Qrcode.getCameras();
-    if(!cameras||cameras.length===0) throw new Error('Kamera bulunamadı');
-    // Arka kamerayı tercih et
-    const cam = cameras.find(c=>c.label.toLowerCase().includes('back')||c.label.toLowerCase().includes('arka'))||cameras[cameras.length-1];
     await scanner.start(
-      cam.id,
-      {fps:10, qrbox:{width:260,height:260}},
+      selectedCameraId,
+      { fps: 12, qrbox: { width: 250, height: 250 } },
       onScanSuccess,
-      ()=>{}
+      () => {}
     );
     scanning = true;
-    setStatus('QR kod bekleniyor…','scan');
+    setStatus('QR Kod Hedefte Bekleniyor...','scan');
   }catch(e){
     setStatus('Hata: '+e.message,'err');
     document.getElementById('startBtn').disabled = false;
@@ -196,49 +287,49 @@ async function stopScan(){
   }
   document.getElementById('startBtn').disabled = false;
   document.getElementById('stopBtn').disabled = true;
-  setStatus('Kamera durduruldu','idle');
+  setStatus('Kamera durduruldu.','idle');
 }
 
 function onScanSuccess(decoded){
-  // Önce durdur
   stopScan();
-  // Veriyi parse et
   try{
     const data = JSON.parse(decoded);
-    if(data.type !== 'nesak-cert') throw new Error('Bu QR Nezaket Akranlar sertifikasına ait değil');
+    if(data.type !== 'nesak-cert') throw new Error('Bu QR kedi, Nezaket Akranlar formatında değil.');
     currentData = data;
     showResult(data);
     addToHistory(data);
-    setStatus('✓ QR başarıyla okundu!','ok');
+    setStatus('✓ QR Kod Başarıyla Doğrulandı!','ok');
   }catch(e){
-    setStatus('Geçersiz QR: '+e.message,'err');
-    setTimeout(()=>startScan(),2000);
+    setStatus('Hata: '+e.message,'err');
+    // Ergonomik hata döngüsü: 2 saniye sonra otomatik yeniden başlar
+    setTimeout(()=>startScan(), 2000);
   }
 }
 
 // ═══════════════════════════════
-// SONUÇ GÖSTER
+// SONUÇ & GEÇMİŞ YÖNETİMİ
 // ═══════════════════════════════
 function showResult(d){
   document.getElementById('rc-team').textContent = d.team||'—';
   document.getElementById('rc-date').textContent = d.date||'—';
   document.getElementById('rc-members').textContent = (d.members||[]).join('  •  ');
   document.getElementById('rc-promise').textContent = d.promise||'—';
-  document.getElementById('resultCard').classList.add('show');
-  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'center'});
+  
+  const rc = document.getElementById('resultCard');
+  rc.classList.add('show');
+  rc.scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 function resetScan(){
   currentData = null;
   document.getElementById('resultCard').classList.remove('show');
-  setStatus('Kamera bekleniyor…','idle');
+  setStatus('Yeni tarama için kamera başlatılıyor...','scan');
   document.getElementById('reader').innerHTML='';
-  document.getElementById('startBtn').disabled=false;
-  document.getElementById('stopBtn').disabled=true;
+  startScan();
 }
 
 // ═══════════════════════════════
-// SERTİFİKA CANVAS ÇİZ
+// SERTİFİKA CANVAS ÇİZİM MOTORU
 // ═══════════════════════════════
 function drawCertCanvas(d){
   const W=595, H=842;
@@ -305,23 +396,23 @@ function drawCertCanvas(d){
 }
 
 // ═══════════════════════════════
-// YAZDIR / İNDİR
+// ÇIKTI MOTORLARI
 // ═══════════════════════════════
 function printCert(){
   if(!currentData) return;
   const canvas = drawCertCanvas(currentData);
-  // Overlay'de göster
   const prev = document.getElementById('previewCanvas');
   prev.width = canvas.width; prev.height = canvas.height;
   prev.getContext('2d').drawImage(canvas,0,0);
-  // Ekrana sığdır
-  const maxW = Math.min(window.innerWidth*0.88, 600);
-  const maxH = window.innerHeight*0.72;
+  
+  const maxW = Math.min(window.innerWidth*0.92, 500);
+  const maxH = window.innerHeight*0.68;
   const scale = Math.min(maxW/canvas.width, maxH/canvas.height);
   prev.style.width  = (canvas.width*scale)+'px';
   prev.style.height = (canvas.height*scale)+'px';
+  
   document.getElementById('printOv').classList.add('show');
-  // print-area'ya koy
+  
   const pa = document.getElementById('print-area');
   pa.innerHTML='';
   const img=document.createElement('img');
@@ -330,9 +421,7 @@ function printCert(){
   pa.appendChild(img);
 }
 
-function doPrint(){
-  window.print();
-}
+function doPrint(){ window.print(); }
 
 async function doDownload(){
   if(!currentData) return;
@@ -359,17 +448,17 @@ async function doDownload(){
 }
 
 function downloadPDF(){ doDownload(); }
-
-function closeOverlay(){
-  document.getElementById('printOv').classList.remove('show');
-}
+function closeOverlay(){ document.getElementById('printOv').classList.remove('show'); }
 
 // ═══════════════════════════════
-// GEÇMİŞ
+// GEÇMİŞ YÖNETİMİ
 // ═══════════════════════════════
 function addToHistory(d){
-  history.unshift({team:d.team, date:d.date, members:d.members, promise:d.promise, score:d.score, scannedAt:new Date().toLocaleTimeString('tr-TR')});
-  if(history.length>20) history.pop();
+  // Çift kayıt kontrolü
+  if(history.some(h => h.team === d.team && h.date === d.date)) return;
+  
+  history.unshift({team:d.team, date:d.date, members:d.members, promise:d.promise, scannedAt:new Date().toLocaleTimeString('tr-TR')});
+  if(history.length>15) history.pop();
   localStorage.setItem('nesak-admin-history', JSON.stringify(history));
   renderHistory();
 }
@@ -391,21 +480,19 @@ function renderHistory(){
 function loadFromHistory(i){
   currentData = history[i];
   showResult(currentData);
-  setStatus('Geçmişten yüklendi: '+currentData.team,'ok');
-  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'center'});
+  setStatus('Geçmiş kaydı yüklendi: '+currentData.team,'ok');
 }
 
 function clearHistory(){
-  if(!confirm('Tüm geçmiş silinsin mi?')) return;
+  if(!confirm('Tüm tarama geçmişi silinsin mi?')) return;
   history=[];
   localStorage.removeItem('nesak-admin-history');
   renderHistory();
 }
 
-// Overlay dışına tıklayınca kapat
 document.getElementById('printOv').addEventListener('click',function(e){if(e.target===this)closeOverlay();});
 
-// Init
+// Sayfa ilk açıldığında geçmiş listesini render et (Kamera akışı auth'tan sonra)
 renderHistory();
 </script>
 </body>
