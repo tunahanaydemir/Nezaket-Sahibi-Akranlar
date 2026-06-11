@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Nezaket Sahibi Akranlar</title>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/davidshimjs-qrcodejs@0.0.2/qrcode.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -1172,6 +1172,7 @@ async function downloadPDF(){
     fillRect(0,p2y+H-8,W,8,'#1A1A1A');
 
     // ── EXPORT ─────────────────────────────
+    // jsPDF yükle
     if(!window.jspdf){
       await new Promise((res,rej)=>{
         const s=document.createElement('script');
@@ -1185,58 +1186,71 @@ async function downloadPDF(){
         document.head.appendChild(s);
       });
     }
-    if(!window.QRCode){
-      await new Promise((res,rej)=>{
-        const s=document.createElement('script');
-        s.src='https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
-        s.onload=res; s.onerror=()=>{
-          const s2=document.createElement('script');
-          s2.src='https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';
-          s2.onload=res; s2.onerror=()=>rej(new Error('QRCode kütüphanesi yüklenemedi'));
-          document.head.appendChild(s2);
-        };
-        document.head.appendChild(s);
-      });
-    }
-
     const {jsPDF}=window.jspdf;
 
-    // Page 1 canvas (sertifika) — ayrı kullanılacak: hem ana PDF'e hem de
-    // tek sayfalık mini-PDF'e (QR içine gömülecek) eklenecek
+    // ── SAYFA 1: SERTİFİKA ────────────────
     const c1=document.createElement('canvas'); c1.width=W*2; c1.height=H*2;
     c1.getContext('2d').drawImage(canvas,0,0,W*2,H*2,0,0,W*2,H*2);
     const c1data=c1.toDataURL('image/jpeg',0.92);
 
-    // Page 2 canvas (özet)
+    // ── SAYFA 2: ÖZET ─────────────────────
     const c2=document.createElement('canvas'); c2.width=W*2; c2.height=H*2;
     c2.getContext('2d').drawImage(canvas,0,H*2,W*2,H*2,0,0,W*2,H*2);
     const c2data=c2.toDataURL('image/jpeg',0.92);
 
-    // ── 1. SAYFAYI TEK BAŞINA İÇEREN MİNİ PDF → BASE64 → QR ────────
-    const miniDoc=new jsPDF({orientation:'portrait',unit:'pt',format:'a4'});
-    miniDoc.addImage(c1data,'JPEG',0,0,W,H);
-    // Base64 (data URI önekisiz, saf base64 string)
-    const miniPdfBase64=miniDoc.output('datauristring').split(',')[1];
-    // QR içine gömülecek veri: tarayıcıya PDF olarak açılacağını belirten data URI
-    const qrPayload='data:application/pdf;base64,'+miniPdfBase64;
+    // ── QR KOD OLUŞTURMA ──────────────────
+    // Sertifika sayfasını küçük boyutlu JPEG'e sıkıştır (QR kapasitesi sınırlı)
+    // Bu yüzden URL tabanlı değil, görseli data URI olarak gömüyoruz
+    // Ancak data URI çok büyük olur → çözüm: sertifika verisini TEXT olarak QR'a bas
+    // Admin paneli bu metni okuyunca hangi takımın sertifikası olduğunu bilir ve gösterir
+    const qrText = JSON.stringify({
+      type:'nesak-cert',
+      team: G.teamName,
+      date: dateStr,
+      members: G.members,
+      promise: G.data.promise||'',
+      score: G.data.finalScore||6
+    });
 
-    // QR kodu büyük boyutlu PNG olarak üret
-    const qrCanvas=document.createElement('canvas');
-    let qrDataUrl;
-    try{
-      await window.QRCode.toCanvas(qrCanvas, qrPayload, {
-        errorCorrectionLevel:'L',
-        margin:1,
-        width:1200,
-        color:{dark:'#000000',light:'#FFFFFF'}
+    // QR canvas oluştur (davidshimjs-qrcodejs kütüphanesi)
+    let qrDataUrl = null;
+    try {
+      const qrDiv = document.createElement('div');
+      qrDiv.style.position='absolute'; qrDiv.style.left='-9999px';
+      document.body.appendChild(qrDiv);
+      const qrSize = 400;
+      // QRCode sınıfı davidshimjs kütüphanesinden geliyor (head'de yüklü)
+      if(typeof QRCode === 'undefined') throw new Error('QRCode nesnesi bulunamadı');
+      const qrObj = new QRCode(qrDiv, {
+        text: qrText,
+        width: qrSize,
+        height: qrSize,
+        colorDark:'#000000',
+        colorLight:'#FFFFFF',
+        correctLevel: QRCode.CorrectLevel.L
       });
-      qrDataUrl=qrCanvas.toDataURL('image/png');
-    }catch(qrErr){
-      console.error('QR oluşturma hatası (veri çok büyük olabilir):',qrErr&&qrErr.message?qrErr.message:qrErr);
+      // QRCode kısa sürede img/canvas oluşturur
+      await new Promise(r=>setTimeout(r,200));
+      const qrImg = qrDiv.querySelector('img') || qrDiv.querySelector('canvas');
+      if(qrImg){
+        if(qrImg.tagName==='CANVAS'){
+          qrDataUrl = qrImg.toDataURL('image/png');
+        } else {
+          // img elemanı: canvas'a çiz
+          const tmpC=document.createElement('canvas'); tmpC.width=qrSize; tmpC.height=qrSize;
+          const tmpCtx=tmpC.getContext('2d');
+          await new Promise(r=>{ qrImg.onload=r; if(qrImg.complete) r(); });
+          tmpCtx.drawImage(qrImg,0,0,qrSize,qrSize);
+          qrDataUrl=tmpC.toDataURL('image/png');
+        }
+      }
+      document.body.removeChild(qrDiv);
+    } catch(qrErr){
+      console.error('QR oluşturma hatası:',qrErr);
       qrDataUrl=null;
     }
 
-    // ── SAYFA 3 – QR KOD SAYFASI ────────────────────────────────
+    // ── SAYFA 3: QR SAYFASI ───────────────
     const c3=document.createElement('canvas'); c3.width=W*2; c3.height=H*2;
     const ctx3=c3.getContext('2d'); ctx3.scale(2,2);
     ctx3.fillStyle='#FFFFFF'; ctx3.fillRect(0,0,W,H);
@@ -1259,7 +1273,6 @@ async function downloadPDF(){
       ctx3.fillStyle='#FFFFFF'; ctx3.fillRect(qx-12,qy-12,qrSize+24,qrSize+24);
       ctx3.strokeStyle='#1A1A1A'; ctx3.lineWidth=1.5; ctx3.strokeRect(qx-12,qy-12,qrSize+24,qrSize+24);
       ctx3.drawImage(qrImg,qx,qy,qrSize,qrSize);
-
       ctx3.font='700 12px Inter,Arial,sans-serif';
       ctx3.fillStyle='#333333';
       ctx3.fillText(G.teamName,W/2,qy+qrSize+45);
@@ -1269,7 +1282,7 @@ async function downloadPDF(){
     } else {
       ctx3.font='600 13px Inter,Arial,sans-serif';
       ctx3.fillStyle='#EF4444';
-      ctx3.fillText('QR kod oluşturulamadı (veri boyutu çok büyük)',W/2,H/2);
+      ctx3.fillText('QR kod oluşturulamadı',W/2,H/2);
     }
 
     ctx3.strokeStyle='#CCCCCC'; ctx3.lineWidth=1;
@@ -1277,10 +1290,9 @@ async function downloadPDF(){
     ctx3.font='600 11px Inter,Arial,sans-serif';
     ctx3.fillStyle='#888888';
     ctx3.fillText('Nezaket Sahibi Akranlar',W/2,H-18);
-
     ctx3.fillStyle='#1A1A1A'; ctx3.fillRect(0,H-8,W,8);
 
-    // ── ANA PDF: 3 SAYFA ─────────────────────────────────────────
+    // ── ANA PDF: 3 SAYFA ──────────────────
     const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'a4'});
     doc.addImage(c1data,'JPEG',0,0,W,H);
     doc.addPage();
