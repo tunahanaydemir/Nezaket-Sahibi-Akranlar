@@ -152,6 +152,7 @@ textarea{resize:vertical;min-height:84px}
 .qr-desc{font-size:12px;color:var(--text3);font-weight:500;margin-bottom:12px;line-height:1.55}
 #qr-reader{width:100%;border-radius:var(--rs);overflow:hidden;margin-bottom:10px}
 #qr-reader video{border-radius:var(--rs)}
+/* html5-qrcode varsayılan butonlarını gizle — bizim butonumuzu kullanıyoruz */
 #qr-reader__dashboard_section_csr button,
 #qr-reader__dashboard_section_swaplink,
 #qr-reader__header_message,
@@ -265,6 +266,9 @@ textarea{resize:vertical;min-height:84px}
 <body>
 <button class="theme-btn" id="theme-btn" onclick="cycleTheme()">🌙 Karanlık</button>
 
+<!-- ═══════════════════════════════════════
+     ONBOARDING
+════════════════════════════════════════ -->
 <div id="scr-ob" class="scr active">
   <div class="ob-hero">
     <div class="ob-ring">🌟</div>
@@ -303,6 +307,9 @@ textarea{resize:vertical;min-height:84px}
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     MAP
+════════════════════════════════════════ -->
 <div id="scr-map" class="scr">
   <div class="map-hdr">
     <div class="team-pill">
@@ -318,6 +325,7 @@ textarea{resize:vertical;min-height:84px}
     <div class="map-img-wrap" id="map-img-wrap">
       <div class="map-ph"><div class="ph-i">🗺️</div><p>Filigran yükleniyor…</p></div>
     </div>
+    <!-- QR SCANNER - ÖN PLANDA -->
     <div class="qr-panel" style="border:2px solid var(--blue);box-shadow:0 0 18px var(--blue-glow)">
       <h3 style="font-size:16px;color:var(--blue);margin-bottom:8px">📷 QR Kod Okut — İstasyona Gir</h3>
       <p class="qr-desc" style="color:var(--text2);margin-bottom:10px">İstasyondaki QR kodu kameraya okutun, otomatik yönlendirilirsiniz.</p>
@@ -334,6 +342,9 @@ textarea{resize:vertical;min-height:84px}
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     S1 – TANITMA & EMPATİ
+════════════════════════════════════════ -->
 <div id="scr-s1" class="scr">
   <div class="st-wrap">
     <div class="st-hdr hdr-green">
@@ -360,6 +371,9 @@ textarea{resize:vertical;min-height:84px}
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     S2 – BİLMECE
+════════════════════════════════════════ -->
 <div id="scr-s2" class="scr">
   <div class="st-wrap">
     <div class="st-hdr hdr-orange">
@@ -371,849 +385,966 @@ textarea{resize:vertical;min-height:84px}
       <div class="card">
         <div class="chip">🔮 Bilmece</div>
         <div class="riddle-wrap">
-          "Ağızdan çıkar birden bire, bazen açar derin yara.<br>
-          Eğer tatlı dille söylenirse, ilaç olur her cana.<br>
-          Kırıcı olursa yıkar kalbi, zehir saçar dünyaya.<br>
-          Nedir bu görünmez güç, yön veren insana?"
+          Aynı bahçede büyüyen iki farklı rüzgarım ben;<br>
+          Biri fırtına olur, kırar dalları; diğeri meltem olur, okşar yaprakları.<br><br>
+          Gölgem düştüğü yerde bir çocuğun gülüşünü çalar,<br>
+          Kalpleri buz tutturur, duvarlar örer, dünyayı daraltır.<br><br>
+          Ama tersine dönersem, bir el uzatırım o karanlığa,<br>
+          Yarım kalmış bir resmi tamamlar, köprüler kurarım yarına.<br><br>
+          Yaşımız da birdir bizim, sıramız da, yolumuz da;<br>
+          Biri zehirdir bu ömrün, diğeri ise şifa.<br><br>
+          İki yüzüm var benim; biri karanlık bir kuyu, diğeri aydınlık bir nehir…<br>
+          <strong style="color:var(--text)">Bil bakalım, ben neyim?</strong>
         </div>
       </div>
       <div class="card">
-        <div class="chip">✍️ Yanıtınız</div>
-        <textarea id="s2-ans" placeholder="Bilmecenin cevabını ve bu konudaki fikrinizi buraya yazın..." oninput="checkS2()"></textarea>
+        <div class="chip">✍️ Yorumunuz</div>
+        <p style="font-size:13px;color:var(--text3);margin-bottom:9px">Bu bilmece neyi anlatıyor? Düşüncenizi yazın (herhangi bir cevap kabul edilir):</p>
+        <textarea id="riddle-ans" placeholder="Bilmece akran ilişkilerini anlatıyor..." oninput="minLen('riddle-ans','s2-btn',8)"></textarea>
+        <button class="btn btn-orange" id="s2-btn" onclick="completeStation(2)" disabled style="margin-top:10px">📤 Gönder &amp; Devam</button>
       </div>
-      <button class="btn btn-orange" id="s2-btn" onclick="completeStation(2)" disabled>✅ 2. İstasyonu Tamamla</button>
     </div>
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     S3 – DRAG & DROP
+════════════════════════════════════════ -->
 <div id="scr-s3" class="scr">
   <div class="st-wrap">
     <div class="st-hdr hdr-purple">
       <div class="st-hdr-top"><button class="back-btn" onclick="goMap()">←</button><div class="st-badge">🎯 3. İstasyon</div></div>
-      <div class="st-h1">Kelimelerin Gücü</div>
-      <div class="st-desc">Nezaketi besleyen ve zorbalığı tetikleyen kelimeleri ayır!</div>
+      <div class="st-h1">Sözlerin Gücü</div>
+      <div class="st-desc">Kelimeleri doğru kutularına sürükle!</div>
     </div>
     <div class="st-body">
       <div class="card">
         <div class="chip">📋 Görev</div>
-        <div class="task-txt">Aşağıdaki kelimeleri basılı tutarak doğru kutulara sürükleyip bırakın.</div>
+        <div class="task-txt">Sözcükleri inceleyin. <strong style="color:var(--green)">💚 Nezaket</strong> veya <strong style="color:var(--red)">❤️‍🔥 Zorbalık</strong> kutusuna sürükleyip bırakın. Yanlış cevaplar onay alarak devam edebilir.</div>
       </div>
       <div class="card">
-        <div class="chip">📦 Kelime Havuzu</div>
-        <div class="words-pool" id="words-pool"></div>
-      </div>
-      <div class="drop-grid">
-        <div class="card drop-zone dz-green" id="dz-good" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'good')">
-          <div class="dz-lbl">🌱 Nezaketi Besleyenler</div>
+        <div class="chip">🔤 Kelimeler</div>
+        <div class="words-pool" id="words-pool" ondragover="event.preventDefault()" ondrop="dropToPool(event)"></div>
+        <div class="drop-grid">
+          <div class="drop-zone dz-green" id="zone-good" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropToZone(event,'good')">
+            <div class="dz-lbl">💚 Nezaket</div>
+          </div>
+          <div class="drop-zone dz-red" id="zone-bad" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="dropToZone(event,'bad')">
+            <div class="dz-lbl">❤️‍🔥 Zorbalık</div>
+          </div>
         </div>
-        <div class="card drop-zone dz-red" id="dz-bad" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'bad')">
-          <div class="dz-lbl">🔥 Zorbalığı Tetikleyenler</div>
+        <div id="s3-fb" class="toast" style="margin-top:10px"></div>
+      </div>
+      <div id="s3-confirm-wrap" style="display:none">
+        <div class="toast t-warn show" style="margin-top:0;margin-bottom:10px">⚠️ Bazı kelimeler yanlış yerde görünüyor. Yine de devam etmek istiyor musunuz?</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="resetS3()" style="flex:1">🔄 Tekrar Dene</button>
+          <button class="btn btn-orange" onclick="completeStation(3)" style="flex:1">Devam Et →</button>
         </div>
       </div>
-      <div id="s3-fb" class="toast" style="display:none"></div>
-      <button class="btn btn-purple" id="s3-btn" onclick="completeStation(3)" disabled>✅ 3. İstasyonu Tamamla</button>
+      <button class="btn btn-purple" id="s3-check-btn" onclick="checkS3()">✅ Kontrol Et</button>
     </div>
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     S4 – ŞİFRE
+════════════════════════════════════════ -->
 <div id="scr-s4" class="scr">
   <div class="st-wrap">
     <div class="st-hdr hdr-red">
       <div class="st-hdr-top"><button class="back-btn" onclick="goMap()">←</button><div class="st-badge">🔐 4. İstasyon</div></div>
-      <div class="st-h1">Perspektif Şifresi</div>
-      <div class="st-desc">Görünmeyen doğruları Sezar şifresiyle çöz!</div>
+      <div class="st-h1">Perspektif Değiştir</div>
+      <div class="st-desc">Sezar şifresi – harfleri 3 adım geri kaydır!</div>
     </div>
     <div class="st-body">
       <div class="card">
-        <div class="chip">🔒 Şifreli Mesaj (Anahtar: +3)</div>
-        <div class="cipher-box">Ö H P D W L</div>
-        <div class="hint-box">
-          <span>💡</span>
-          <div>Alfabedeki her harfi 3 adım geri kaydırarak asıl kelimeyi bulun (Örn: Ç&rarr;A, D&rarr;B). Büyük harflerle yazın.</div>
-        </div>
+        <div class="chip">🔐 Şifreli Metin</div>
+        <div class="cipher-box">Şhd qdh ddd udh dqp dn,<br>g vd nod pd ng tt gx u.</div>
+        <div class="hint-box"><span>💡</span><span>Her harfi Türk alfabesinde <strong>3 adım geriye</strong> kaydırarak şifreyi çöz! Örn: Ş→N, H→E, D→A …</span></div>
+        <p style="font-size:11px;color:var(--text3);font-style:italic">Herhangi bir cevap yazmanız ilerlemenizi sağlar. Doğru cevap PDF'te karşılaştırmalı gösterilir.</p>
       </div>
       <div class="card">
-        <div class="chip">🔑 Çözümünüz</div>
-        <input type="text" id="s4-ans" placeholder="Çözdüğünüz gizli kelimeyi yazın..." oninput="checkS4()">
-        <div class="answer-compare" id="s4-comp">
-          <div class="ac-row"><div class="ac-lbl">Durum:</div><div class="ac-val" id="s4-status">—</div></div>
-        </div>
+        <div class="chip">✍️ Çözümünüz</div>
+        <input type="text" id="cipher-ans" placeholder="Şifre çözümünüzü yazın..." oninput="minLen('cipher-ans','s4-btn',3)">
+        <div id="s4-fb" class="toast" style="margin-top:8px"></div>
+        <button class="btn btn-red" id="s4-btn" onclick="completeStation(4)" disabled style="margin-top:10px">✅ 4. İstasyonu Tamamla</button>
       </div>
-      <button class="btn btn-red" id="s4-btn" onclick="completeStation(4)" disabled>✅ 4. İstasyonu Tamamla</button>
     </div>
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     S5 – SENARYO
+════════════════════════════════════════ -->
 <div id="scr-s5" class="scr">
   <div class="st-wrap">
     <div class="st-hdr hdr-teal">
       <div class="st-hdr-top"><button class="back-btn" onclick="goMap()">←</button><div class="st-badge">⚖️ 5. İstasyon</div></div>
       <div class="st-h1">Kriz Masası</div>
-      <div class="st-desc">Siber zorbalık karşısında doğru adımı seçin!</div>
+      <div class="st-desc">Sen ne yapardın?</div>
     </div>
     <div class="st-body">
       <div class="card">
-        <div class="chip">💬 Senaryo</div>
-        <div class="task-txt">Sınıf grubunda bir arkadaşınızın paylaştığı resimle dalga geçildiğini ve gruptakilerin kırıcı yorumlar yaptığını gördünüz. Bu durumda ne yaparsınız?</div>
+        <div class="chip">📖 Senaryo</div>
+        <div class="task-txt">Okul yemekhanesinde bir arkadaşınızın tepsisi kazaen dökülüyor. Etraftaki bir grup alay edip videoya çekmeye başlıyor. Arkadaşınız utanmış ve ağlamak üzere.<br><br><strong>Ekibinizle tartışın ve ne yapacağınıza karar verin:</strong></div>
       </div>
-      <div class="s-opts">
-        <div class="s-opt" onclick="selS5(this, 1)">
-          <div class="opt-l">A</div>
-          <div class="opt-txt">Görmezden gelirim, beni ilgilendirmediğini düşünüp gruptan çıkarım.</div>
+      <div class="card">
+        <div class="chip">🤔 Seçenekler</div>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:9px;font-style:italic">Herhangi bir seçenek ilerlemenizi engellemez.</p>
+        <div class="s-opts" id="s5-opts">
+          <div class="s-opt" onclick="selOpt(this,'A')" data-val="A"><div class="opt-l">A</div><div class="opt-txt">«Bizi ilgilendirmez» deyip masamıza geri dönmek.</div></div>
+          <div class="s-opt" onclick="selOpt(this,'B')" data-val="B"><div class="opt-l">B</div><div class="opt-txt">Alay eden gruba bağırıp çağırarak fiziksel kavga başlatmak.</div></div>
+          <div class="s-opt" onclick="selOpt(this,'C')" data-val="C"><div class="opt-l">C</div><div class="opt-txt">Videoya çekenleri uyararak durdurmak, arkadaşın elinden tutup kaldırmak, dökülenleri toplamaya yardım etmek ve onu sakin bir yere götürmek.</div></div>
         </div>
-        <div class="s-opt" onclick="selS5(this, 2)">
-          <div class="opt-l">B</div>
-          <div class="opt-txt">Gruba kırıcı yorumlar yazanlara karşı sert ve öfkeli sözlerle çıkışırım.</div>
-        </div>
-        <div class="s-opt" onclick="selS5(this, 3)">
-          <div class="opt-l">C</div>
-          <div class="opt-txt">Dalga geçilen arkadaşıma özelden destek mesajı atarım. Gruptakileri de nezakete davet edip gerekirse durumu bir öğretmene bildiririm.</div>
-        </div>
+        <div id="s5-fb" class="toast" style="margin-top:10px"></div>
       </div>
-      <button class="btn btn-teal" id="s5-btn" onclick="completeStation(5)" disabled>✅ 5. İstasyonu Tamamla</button>
     </div>
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     S6 – NEZAKET ANITL
+════════════════════════════════════════ -->
 <div id="scr-s6" class="scr">
   <div class="st-wrap">
     <div class="st-hdr hdr-blue">
-      <div class="st-hdr-top"><button class="back-btn" onclick="goMap()">←</button><div class="st-badge">🏆 6. İstasyon</div></div>
-      <div class="st-h1">Nezaket Anıtı ve Sözü</div>
-      <div class="st-desc">Geleceğe kalıcı bir söz bırakın!</div>
+      <div class="st-hdr-top"><button class="back-btn" onclick="goMap()">←</button><div class="st-badge">🏆 6. İstasyon – FİNAL</div></div>
+      <div class="st-h1">Nezaket Anıtı</div>
+      <div class="st-desc">Son durak — sözünü ver ve sertifikayı al!</div>
     </div>
     <div class="st-body">
       <div class="card">
-        <div class="chip">🤝 Ortak Taahhüt</div>
-        <div class="task-txt">Ekip olarak tartışın ve okulda nezaket iklimini korumak için <strong>bir cümlelik söz (taahhüt)</strong> yazın. Ardından ekip ruhunu yansıtan son bir fotoğraf ekleyin!</div>
+        <div class="chip">🎉 Tebrikler!</div>
+        <div class="task-txt">Tüm istasyonları tamamladınız! Ekibinizle <strong>bir fotoğraf çekip</strong> Nezaket Sözünüzü yazın.</div>
       </div>
       <div class="card">
-        <div class="chip">✍️ Nezaket Sözümüz</div>
-        <input type="text" id="s6-promise" placeholder="Örn: Herkesi olduğu gibi kabul edecek ve kırıcı dilden uzak duracağız." oninput="checkS6()">
-        <div class="promise-prev" id="promise-prev"></div>
-      </div>
-      <div class="card">
-        <div class="chip">📸 Son Ekip Fotoğrafı</div>
+        <div class="chip">📸 Final Fotoğrafı</div>
         <div class="photo-zone" onclick="document.getElementById('p6-inp').click()">
-          <div class="pz-icon" id="p6-ic">📸</div>
-          <p id="p6-txt">Kapanış fotoğrafını seç veya çek</p>
+          <div class="pz-icon" id="p6-ic">📷</div>
+          <p id="p6-txt">Ekip fotoğrafı çek / yükle</p>
           <input type="file" id="p6-inp" accept="image/*" capture="environment" onchange="handlePhoto(6)">
           <img id="p6-prev" class="photo-prev" alt="">
         </div>
       </div>
-      <button class="btn btn-blue" id="s6-btn" onclick="completeStation(6)" disabled>🏁 Macerayı Tamamla ve Sonuca Git!</button>
+      <div class="card">
+        <div class="chip">✍️ Nezaket Sözü</div>
+        <textarea id="promise-txt" placeholder="Örn: Biz, her akranımıza saygıyla davranmayı söz veriyoruz!" oninput="checkS6()"></textarea>
+        <div id="promise-prev" class="promise-prev"></div>
+        <button class="btn btn-blue" id="s6-btn" onclick="finishGame()" disabled style="margin-top:10px">🏁 Oyunu Bitir &amp; Sertifikayı Al!</button>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════
+     CERTIFICATE SCREEN
+════════════════════════════════════════ -->
 <div id="scr-cert" class="scr">
   <div class="cert-wrap">
-    <div class="cert-card">
+    <div id="pdf-spin" class="pdf-spin"><div class="spin-ring"></div> PDF oluşturuluyor…</div>
+    <button class="btn btn-purple" onclick="downloadPDF()" style="margin-bottom:14px;font-size:17px;padding:16px">⬇️ PDF Sertifika İndir</button>
+    <div id="cert-card" class="cert-card">
       <div class="cert-glow"></div>
       <div class="cert-rainbow"></div>
       <div class="cert-logo-row">
-        <span class="cert-logo">🏆</span>
-        <div class="cert-badge-lbl">BAŞARI BELGESİ</div>
-        <div class="cert-main-title">NEZAKET ELÇİSİ</div>
+        <div class="cert-logo">🌟</div>
+        <div class="cert-badge-lbl">Nezaket Elçileri</div>
+        <div class="cert-main-title">Başarı Sertifikası</div>
       </div>
       <div class="cert-div"></div>
       <div class="cert-team">
-        <div class="cert-team-lbl">Tebrikler Efendim!</div>
-        <div class="cert-team-nm" id="c-team-nm">—</div>
+        <div class="cert-team-lbl">Ekip Adı</div>
+        <div class="cert-team-nm" id="cert-team-nm">—</div>
       </div>
-      <div class="cert-members" id="c-members"></div>
+      <div class="cert-members" id="cert-members"></div>
       <div class="cert-mascot-row">
-        <span class="cert-mascot-ic" id="c-mascot-ic">🦋</span>
-        <span class="cert-mascot-nm" id="c-mascot-nm">—</span>
+        <div class="cert-mascot-ic" id="cert-mascot-ic">🌟</div>
+        <div class="cert-mascot-nm" id="cert-mascot-nm">—</div>
       </div>
       <div class="cert-promise">
-        <div class="cert-p-lbl">Nezaket Sözü</div>
-        <div class="cert-p-txt" id="c-promise">"—"</div>
+        <div class="cert-p-lbl">💚 Nezaket Sözümüz</div>
+        <div class="cert-p-txt" id="cert-p-txt">—</div>
       </div>
-      <div class="cert-school">Akran Zorbalığı Önleme Projesi</div>
-      <div class="cert-date" id="c-date">Haziran 2026</div>
+      <div class="cert-div"></div>
+      <div class="cert-date" id="cert-date">—</div>
+      <div class="cert-school">Nezaket Sahibi Akranlar</div>
     </div>
-
     <div class="sum-card">
-      <div class="sum-hdr"><span>📊</span> İstasyon Özetleri</div>
-      <div class="sum-item">
-        <div class="sum-ic">📸</div>
-        <div><div class="sum-lbl">1. Tanışma Görevi</div><div class="sum-val" style="color:var(--green)">Fotoğraf yüklendi ✓</div></div>
-      </div>
-      <div class="sum-item">
-        <div class="sum-ic">🔮</div>
-        <div><div class="sum-lbl">2. Bilmece Yanıtı</div><div class="sum-val" id="sum-s2">—</div></div>
-      </div>
-      <div class="sum-item">
-        <div class="sum-ic">🎯</div>
-        <div><div class="sum-lbl">3. Kelime Ayrıştırma</div><div class="sum-val" style="color:var(--green)">Kelimeler doğru eşleştirildi ✓</div></div>
-      </div>
-      <div class="sum-item">
-        <div class="sum-ic">🔐</div>
-        <div><div class="sum-lbl">4. Şifre Çözümü</div><div class="sum-val" id="sum-s4" style="color:var(--green)">—</div></div>
-      </div>
-      <div class="sum-item">
-        <div class="sum-ic">⚖️</div>
-        <div><div class="sum-lbl">5. Kriz Masası Kararı</div><div class="sum-val" id="sum-s5" style="color:var(--teal)">—</div></div>
-      </div>
-      <div class="sum-item">
-        <div class="sum-ic">🏆</div>
-        <div><div class="sum-lbl">6. Kapanış Görevi</div><div class="sum-val" style="color:var(--green)">Fotoğraf ve taahhüt hazır ✓</div></div>
-      </div>
+      <div class="sum-hdr">📋 Ekip Özeti</div>
+      <div id="sum-items"></div>
     </div>
-
-    <button class="btn btn-blue" onclick="downloadPDF()">📥 Profesyonel Yatay PDF İndir</button>
-    <div class="pdf-spin" id="pdf-spin"><div class="spin-ring"></div> Yüksek Kaliteli PDF Oluşturuluyor...</div>
-    <button class="btn btn-ghost" onclick="resetGame()" style="margin-top:10px">🔄 Yeni Oyun Başlat</button>
   </div>
 </div>
 
+<!-- CELEBRATION -->
 <div class="cel-ov" id="cel-ov">
   <div class="cel-card">
-    <div class="cel-emoji" id="cel-emoji">🎉</div>
-    <div class="cel-title" id="cel-title">Tebrikler!</div>
-    <div class="cel-sub" id="cel-sub">İstasyonu başarıyla geçtiniz. Harika bir iş çıkardınız efendim!</div>
-    <button class="btn btn-blue" onclick="closeCelModal()">Devam Et</button>
+    <div class="cel-emoji" id="cel-e">🎉</div>
+    <div class="cel-title" id="cel-t">Harika!</div>
+    <div class="cel-sub" id="cel-s">İstasyon tamamlandı!</div>
+    <button class="btn btn-blue" onclick="closeCel()">Devam Et →</button>
   </div>
 </div>
 
 <script>
-// OYUN DURUMU (GLOBAL GLOBAL STATE)
-const G = {
-  theme: 'dark',
-  teamName: '',
-  members: [],
-  mascotIcon: '🌟',
-  mascotName: 'Rehber',
-  currentStation: 1,
-  unlockedStation: 1,
-  data: {
-    photo1: null,
-    riddle: '',
-    cipher: '',
-    s5Opt: 0,
-    promise: '',
-    photo6: null
+// ═══════════════════════════════
+// TEMA YÖNETİMİ
+// ═══════════════════════════════
+(function(){
+  const btn=document.getElementById('theme-btn');
+  const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  // Başlangıç: sistem teması
+  let mode = prefersDark ? 'dark' : 'light';
+  applyTheme(mode);
+  function applyTheme(m){
+    if(m==='light'){
+      document.documentElement.setAttribute('data-theme','light');
+      btn.textContent='☀️ Açık';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      btn.textContent='🌙 Karanlık';
+    }
   }
+  window.cycleTheme=function(){
+    mode = (mode==='dark') ? 'light' : 'dark';
+    applyTheme(mode);
+  };
+})();
+
+// ═══════════════════════════════
+// STATE – memory only, no storage
+// ═══════════════════════════════
+const G = {
+  teamName:'', members:[], mascotIcon:'', mascotName:'',
+  curStation:1, done:[], data:{}
 };
 
-const STATIONS_INFO = [
-  {id:1, title:'Tanışma ve Empati', icon:'📸', type:'photo'},
-  {id:2, title:'Zehir mi, Şifa mı?', icon:'🔮', type:'riddle'},
-  {id:3, title:'Kelimelerin Gücü', icon:'🎯', type:'drag'},
-  {id:4, title:'Perspektif Şifresi', icon:'🔐', type:'cipher'},
-  {id:5, title:'Kriz Masası', icon:'⚖️', type:'scenario'},
-  {id:6, title:'Nezaket Anıtı', icon:'🏆', type:'final'}
+const ST_META = [
+  {n:1,title:'Tanışma ve Empati', sub:'Fotoğraf görevi',     ic:'📸'},
+  {n:2,title:'Zehir mi, Şifa mı?',sub:'Bilmece & yorum',     ic:'🔮'},
+  {n:3,title:'Sözlerin Gücü',     sub:'Kelime ayıklama',     ic:'🎯'},
+  {n:4,title:'Perspektif Değiştir',sub:'Şifre çözme',        ic:'🔐'},
+  {n:5,title:'Kriz Masası',        sub:'Senaryo seçimi',     ic:'⚖️'},
+  {n:6,title:'Nezaket Anıtı',      sub:'Final & manifesto',  ic:'🏆'},
+];
+const CIPHER_CORRECT = 'nezaket anlamaktir desteklemek guc verir';
+const WORDS_DATA = [
+  {t:'Dışlama',         c:'bad'},
+  {t:'Takdir Etme',     c:'good'},
+  {t:'Dedikodu',        c:'bad'},
+  {t:'Lakap Takma',     c:'bad'},
+  {t:'Destek Olma',     c:'good'},
+  {t:'İltifat',         c:'good'},
+  {t:'Görmezden Gelme', c:'bad'},
+  {t:'Paylaşma',        c:'good'},
+  {t:'Teşvik Etme',     c:'good'},
 ];
 
-const POOL_WORDS = [
-  {txt:'Günaydın', type:'good'}, {txt:'Lütfen', type:'good'}, {txt:'Teşekkür Ederim', type:'good'},
-  {txt:'Geçmiş Olsun', type:'good'}, {txt:'Tebrik Ederim', type:'good'}, {txt:'Hakaret', type:'bad'},
-  {txt:'Dışlama', type:'bad'}, {txt:'Lakap Takma', type:'bad'}, {txt:'Tehdit', type:'bad'}, {txt:'Alay Etme', type:'bad'}
-];
-
-// BAŞLANGIÇ AYARLARI
-window.addEventListener('DOMContentLoaded', () => {
-  renderMascots();
-  createFiligran();
-});
-
-function cycleTheme(){
-  const btn = document.getElementById('theme-btn');
-  if(G.theme==='dark'){
-    G.theme='light'; document.body.setAttribute('data-theme','light'); btn.innerHTML='☀️ Aydınlık';
-  } else {
-    G.theme='dark'; document.body.removeAttribute('data-theme'); btn.innerHTML='🌙 Karanlık';
-  }
-}
-
-// ONBOARDING
-function addMember(){
-  const container = document.getElementById('mem-container');
-  const count = container.querySelectorAll('.mem-row').length + 1;
-  const row = document.createElement('div');
-  row.className = 'mem-row';
-  row.innerHTML = `<input type="text" placeholder="${count}. Üye adı" class="mem-inp"><button class="btn-icon btn-rm" onclick="removeMember(this)">✕</button>`;
-  container.appendChild(row);
-}
-function removeMember(btn){
-  btn.parentElement.remove();
-  const inps = document.querySelectorAll('.mem-inp');
-  inps.forEach((inp, i) => inp.placeholder = `${i+1}. Üye adı`);
-}
-function selMascot(card, icon, name){
-  document.querySelectorAll('.mascot-card').forEach(c => c.classList.remove('sel'));
-  card.classList.add('sel');
-  G.mascotIcon = icon; G.mascotName = name;
-}
-function renderMascots(){
-  // İlk maskotu varsayılan seç
-  const first = document.querySelector('.mascot-card');
-  if(first) first.click();
-}
-
-function startGame(){
-  const tInp = document.getElementById('inp-team').value.trim();
-  const mInps = document.querySelectorAll('.mem-inp');
-  const err = document.getElementById('ob-err');
-  
-  if(!tInp){ err.textContent='Lütfen bir ekip adı girin efendim!'; err.style.display='flex'; return; }
-  
-  const members = [];
-  mInps.forEach(inp => { const v=inp.value.trim(); if(v) members.push(v); });
-  if(members.length===0){ err.textContent='En az bir ekip üyesi yazmalısınız!'; err.style.display='flex'; return; }
-  
-  err.style.display = 'none';
-  G.teamName = tInp;
-  G.members = members;
-  
-  // Harita verilerini bas
-  document.getElementById('map-team-nm').textContent = G.teamName;
-  document.getElementById('map-team-mbs').textContent = G.members.join(', ');
-  document.getElementById('map-mascot').textContent = G.mascotIcon;
-  
-  refreshMapList();
-  showScreen('scr-map');
-  triggerConfetti();
-}
-
+// ═══════════════════════════════
 // NAVIGATION
-function showScreen(id){
-  document.querySelectorAll('.scr').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
-}
-function goMap(){ showScreen('scr-map'); stopQR(); }
+// ═══════════════════════════════
+function show(id){ document.querySelectorAll('.scr').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+function goMap(){ stopQR(); renderMap(); show('scr-map'); }
 
-// MAP FILIGRAN
-function createFiligran(){
-  const wrap = document.getElementById('map-img-wrap');
-  const cvs = document.createElement('canvas');
-  cvs.width = 340; cvs.height = 200;
-  const ctx = cvs.getContext('2d');
-  ctx.fillStyle = G.theme==='dark'?'#141926':'#FFFFFF'; ctx.fillRect(0,0,340,200);
-  ctx.strokeStyle = '#263040'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
-  ctx.strokeRect(10,10,320,180);
-  ctx.fillStyle = '#4A5875'; ctx.font = '900 12px Inter, sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText('NEZAKET ORYANTİRİNG HARİTASI', 170, 35);
-  // Noktalar arası çizgiler
-  ctx.beginPath(); ctx.setLineDash([]); ctx.strokeStyle = 'rgba(76,158,235,0.2)'; ctx.lineWidth = 2;
-  ctx.moveTo(50,110); ctx.lineTo(110,80); ctx.lineTo(170,140); ctx.lineTo(220,70); ctx.lineTo(280,120); ctx.stroke();
-  // İstasyon halkaları
-  const pts = [{x:50,y:110},{x:110,y:80},{x:170,y:140},{x:220,y:70},{x:280,y:120},{x:170,y:90}];
-  pts.forEach((p,i) => {
-    ctx.fillStyle = i===0?'#3DD68C':'#232B3E'; ctx.beginPath(); ctx.arc(p.x,p.y,12,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif'; ctx.fillText(i+1, p.x, p.y+4);
-  });
-  wrap.innerHTML = '';
-  const img = document.createElement('img'); img.src = cvs.toDataURL(); wrap.appendChild(img);
+// ═══════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════
+let memCnt=2, selMascotData=null;
+function addMember(){
+  memCnt++;
+  const c=document.getElementById('mem-container');
+  const r=document.createElement('div'); r.className='mem-row';
+  r.innerHTML=`<input type="text" placeholder="${memCnt}. Üye adı" class="mem-inp"><button class="btn-icon btn-rm" onclick="removeMember(this)">✕</button>`;
+  c.appendChild(r);
+}
+function removeMember(b){ b.closest('.mem-row').remove(); }
+function selMascot(el,icon,name){
+  document.querySelectorAll('.mascot-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); selMascotData={icon,name};
+}
+function startGame(){
+  const tn=document.getElementById('inp-team').value.trim();
+  const mbs=[...document.querySelectorAll('.mem-inp')].map(i=>i.value.trim()).filter(Boolean);
+  const err=document.getElementById('ob-err');
+  const se=m=>{err.textContent=m;err.style.display='flex';};
+  if(!tn){se('⚠️ Ekip adı girin!');return;}
+  if(!mbs.length){se('⚠️ En az bir üye ekleyin!');return;}
+  if(!selMascotData){se('⚠️ Maskot seçin!');return;}
+  err.style.display='none';
+  G.teamName=tn; G.members=mbs;
+  G.mascotIcon=selMascotData.icon; G.mascotName=selMascotData.name;
+  G.curStation=1; G.done=[]; G.data={};
+  renderMap(); show('scr-map');
 }
 
-function refreshMapList(){
-  const list = document.getElementById('st-list');
-  list.innerHTML = '';
-  document.getElementById('map-prog').textContent = `${G.unlockedStation-1}/6`;
-  
-  STATIONS_INFO.forEach(st => {
-    const row = document.createElement('div');
-    let statusClass = 'locked-r';
-    let numHtml = `<div class="st-num wait">${st.id}</div>`;
-    let clickFn = '';
-    
-    if(st.id < G.unlockedStation){
-      statusClass = 'done-r';
-      numHtml = `<div class="st-num done">✓</div>`;
-      clickFn = `openStation(${st.id})`;
-    } else if(st.id === G.unlockedStation){
-      statusClass = 'active-r';
-      numHtml = `<div class="st-num now">${st.id}</div>`;
-      clickFn = `openStation(${st.id})`;
-    }
-    
-    row.className = `st-row ${statusClass}`;
-    if(clickFn) row.setAttribute('onclick', clickFn);
-    
-    row.innerHTML = `
-      ${numHtml}
-      <div class="st-info">
-        <div class="st-title">${st.icon} ${st.id}. ${st.title}</div>
-        <div class="st-sub">${st.id===G.unlockedStation?'Şu an buradasınız':'Giriş kilidi açık'}</div>
-      </div>
-    `;
+// ═══════════════════════════════
+// MAP
+// ═══════════════════════════════
+function renderMap(){
+  document.getElementById('map-mascot').textContent=G.mascotIcon;
+  document.getElementById('map-team-nm').textContent=G.teamName;
+  document.getElementById('map-team-mbs').textContent=G.members.join(', ');
+  document.getElementById('map-prog').textContent=G.done.length+'/6';
+  // map image
+  const wrap=document.getElementById('map-img-wrap');
+  const img=new Image();
+  img.onload=()=>{wrap.innerHTML='';wrap.appendChild(img);img.style.width='100%';};
+  img.src='map.gif';
+  // station list
+  const list=document.getElementById('st-list'); list.innerHTML='';
+  ST_META.forEach(st=>{
+    const done=G.done.includes(st.n);
+    const active=(st.n===G.curStation)&&!done;
+    const locked=!done&&!active;
+    const row=document.createElement('div');
+    row.className='st-row '+(done?'':active?'active-r':'locked-r');
+    row.innerHTML=`<div class="st-num ${done?'done':active?'now':'wait'}">${done?'✓':st.ic}</div>
+      <div class="st-info"><div class="st-title">${st.n}. ${st.title}</div><div class="st-sub">${st.sub}</div></div>
+      ${active?'<div style="color:var(--blue);font-size:13px;font-weight:700">QR →</div>':''}`;
     list.appendChild(row);
   });
 }
 
-// QR RECONSTRUCTION & SCANNING
-let html5QrcodeScanner = null;
-function startQR(){
-  document.getElementById('btn-start-scan').style.display = 'none';
-  document.getElementById('btn-stop-scan').style.display = 'block';
-  const fb = document.getElementById('qr-fb'); fb.className='toast t-info show'; fb.textContent='Kamera aranıyor...';
-  
-  html5QrcodeScanner = new Html5Qrcode("qr-reader");
-  html5QrcodeScanner.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 230, height: 230 } },
-    (decodedText) => {
-      // QR başarıyla okunduğunda tetiklenen fonksiyon
-      fb.className='toast t-ok show'; fb.textContent='Kod okundu: ' + decodedText;
-      stopQR();
-      handleQRResult(decodedText);
-    },
-    () => {}
-  ).catch(err => {
-    fb.className='toast t-err show'; fb.textContent='Kamera başlatılamadı veya izin verilmedi.';
-    document.getElementById('btn-start-scan').style.display = 'block';
-    document.getElementById('btn-stop-scan').style.display = 'none';
-  });
-}
-function stopQR(){
-  if(html5QrcodeScanner){
-    html5QrcodeScanner.stop().then(() => { html5QrcodeScanner = null; }).catch(() => {});
+// ═══════════════════════════════
+// QR SCANNER – html5-qrcode kütüphanesi
+// ═══════════════════════════════
+let _html5QrScanner = null;
+
+async function startQR(){
+  const fb = document.getElementById('qr-fb');
+  const btnStart = document.getElementById('btn-start-scan');
+  const btnStop = document.getElementById('btn-stop-scan');
+
+  if(typeof Html5Qrcode === 'undefined'){
+    setToast(fb,'err','❌ QR kütüphanesi yüklenemedi. Sayfayı yenileyin veya internet bağlantınızı kontrol edin.');
+    return;
   }
-  document.getElementById('btn-start-scan').style.display = 'block';
-  document.getElementById('btn-stop-scan').style.display = 'none';
-  document.getElementById('qr-fb').classList.remove('show');
-}
 
-function handleQRResult(text){
-  let num = parseInt(text.replace(/[^0-9]/g, ''));
-  if(!num && text.toLowerCase().includes('nezaket')){
-    if(text.includes('1')) num=1; else if(text.includes('2')) num=2; else if(text.includes('3')) num=3;
-    else if(text.includes('4')) num=4; else if(text.includes('5')) num=5; else if(text.includes('6')) num=6;
-  }
-  if(!num){ alert('Geçersiz QR Kod. Lütfen istasyon panosundaki kodu okutun.'); return; }
-  if(num > G.unlockedStation){ alert(`Henüz ${num}. İstasyona geçemezsiniz. Lütfen sırayla ilerleyin efendim.`); return; }
-  openStation(num);
-}
+  btnStart.disabled = true;
+  setToast(fb,'info','📷 Kamera başlatılıyor…');
 
-function openStation(id){
-  G.currentStation = id;
-  if(id===3) initS3();
-  showScreen(`scr-s${id}`);
-}
-
-// STATION 1 MANTIĞI
-function handlePhoto(id){
-  const inp = document.getElementById(`p${id}-inp`);
-  const prev = document.getElementById(`p${id}-prev`);
-  const txt = document.getElementById(`p${id}-txt`);
-  const ic = document.getElementById(`p${id}-ic`);
-  
-  if(inp.files && inp.files[0]){
-    const r = new FileReader();
-    r.onload = function(e){
-      prev.src = e.target.result; prev.style.display = 'block';
-      txt.textContent = 'Fotoğraf güncellendi ✓';
-      if(ic) ic.textContent = '📸';
-      G.data[`photo${id}`] = e.target.result;
-      if(id===1) document.getElementById('s1-btn').disabled = false;
-      if(id===6) checkS6();
-    };
-    r.readAsDataURL(inp.files[0]);
+  try{
+    _html5QrScanner = new Html5Qrcode('qr-reader');
+    await _html5QrScanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 220, height: 220 } },
+      (decodedText) => { handleQR(decodedText); },
+      (errorMsg) => { /* tarama sürüyor, hata değil */ }
+    );
+    btnStart.style.display = 'none';
+    btnStop.style.display = 'flex';
+    setToast(fb,'info','🔍 QR kodu çerçeve içine getirin…');
+  } catch(err){
+    btnStart.disabled = false;
+    _html5QrScanner = null;
+    if(err && (err.toString().includes('NotAllowed') || err.toString().includes('Permission'))){
+      setToast(fb,'err','❌ Kamera izni reddedildi. Tarayıcı adres çubuğundaki kilit simgesinden izin verin.');
+    } else if(err && err.toString().includes('NotFound')){
+      setToast(fb,'err','❌ Kamera bulunamadı.');
+    } else {
+      setToast(fb,'err','❌ Kamera açılamadı: ' + (err.message || err));
+    }
   }
 }
 
-// STATION 2 MANTIĞI
-function checkS2(){
-  const val = document.getElementById('s2-ans').value.trim();
-  G.data.riddle = val;
-  document.getElementById('s2-btn').disabled = val.length < 5;
+async function stopQR(){
+  const btnStart = document.getElementById('btn-start-scan');
+  const btnStop = document.getElementById('btn-stop-scan');
+  if(_html5QrScanner){
+    try{ await _html5QrScanner.stop(); } catch(e){}
+    try{ _html5QrScanner.clear(); } catch(e){}
+    _html5QrScanner = null;
+  }
+  btnStop.style.display = 'none';
+  btnStart.style.display = 'flex';
+  btnStart.disabled = false;
+  document.getElementById('qr-reader').innerHTML = '';
 }
 
-// STATION 3 MANTIĞI (DRAG & DROP)
-let s3CorrectCount = 0;
+async function handleQR(raw){
+  await stopQR();
+  const fb = document.getElementById('qr-fb');
+  const text = raw.toLowerCase().replace(/\s/g,'');
+  let num = null;
+  const um = text.match(/[?&]istasyon=(\d)/);
+  const wm = text.match(/istasyon(\d)/);
+  const bm = text.match(/^(\d)$/);
+  if(um) num = parseInt(um[1]);
+  else if(wm) num = parseInt(wm[1]);
+  else if(bm) num = parseInt(bm[1]);
+
+  if(!num || num < 1 || num > 6){
+    setToast(fb,'err','❌ Geçersiz QR Kod! Oyuna ait bir kod değil. Tekrar deneyin.');
+    return;
+  }
+  if(G.done.includes(num)){
+    setToast(fb,'info',`✓ ${num}. İstasyon zaten tamamlandı.`);
+    return;
+  }
+  if(num !== G.curStation){
+    setToast(fb,'err',`⚠️ Sıradaki istasyon ${G.curStation}. Lütfen sırayla ilerleyin.`);
+    return;
+  }
+  setToast(fb,'ok',`✅ ${num}. İstasyon doğrulandı! Yönlendiriliyorsunuz…`);
+  setTimeout(()=>openStation(num), 700);
+}
+
+function openStation(n){
+  if(n===3) initS3();
+  const ids=['scr-s1','scr-s2','scr-s3','scr-s4','scr-s5','scr-s6'];
+  show(ids[n-1]);
+}
+
+// ═══════════════════════════════
+// HELPERS
+// ═══════════════════════════════
+function setToast(el,type,msg){
+  el.className='toast'; el.textContent=msg;
+  if(!msg){el.style.display='none';return;}
+  const map={ok:'t-ok',err:'t-err',info:'t-info',warn:'t-warn'};
+  el.classList.add('show',map[type]||'t-info');
+}
+function minLen(inp,btn,n){
+  document.getElementById(btn).disabled=document.getElementById(inp).value.trim().length<n;
+}
+
+// ═══════════════════════════════
+// PHOTO
+// ═══════════════════════════════
+function handlePhoto(n){
+  const f=document.getElementById(`p${n}-inp`).files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const pv=document.getElementById(`p${n}-prev`);
+    pv.src=e.target.result; pv.style.display='block';
+    document.getElementById(`p${n}-ic`).textContent='✅';
+    document.getElementById(`p${n}-txt`).textContent='Değiştirmek için tekrar tıkla';
+    G.data[`photo${n}`]=e.target.result;
+    if(n===1){ document.getElementById('s1-btn').disabled=false; }
+    if(n===6) checkS6();
+  };
+  r.readAsDataURL(f);
+}
+
+// ═══════════════════════════════
+// S3 – DRAG DROP
+// ═══════════════════════════════
+let dragChip=null;
 function initS3(){
-  s3CorrectCount = 0;
-  document.getElementById('s3-btn').disabled = true;
-  const pool = document.getElementById('words-pool'); pool.innerHTML = '';
-  document.getElementById('dz-good').querySelectorAll('.word-chip').forEach(c=>c.remove());
-  document.getElementById('dz-bad').querySelectorAll('.word-chip').forEach(c=>c.remove());
-  
-  // Kelimeleri karıştırıp bas
-  const shuffled = [...POOL_WORDS].sort(() => Math.random() - 0.5);
-  shuffled.forEach((w, idx) => {
-    const chip = document.createElement('div');
-    chip.className = 'word-chip';
-    chip.textContent = w.txt;
-    chip.id = `chip-${idx}`;
-    chip.setAttribute('draggable', 'true');
-    chip.setAttribute('data-type', w.type);
-    
-    // Drag events
-    chip.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', chip.id);
-      chip.classList.add('dragging');
-    });
-    chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
-    
-    // Mobil Dokunmatik Desteği (Touch Events Re-mapping)
-    chip.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-      const touch = e.touches[0];
-      chip.style.position = 'fixed';
-      chip.style.left = `${touch.clientX - 40}px`;
-      chip.style.top = `${touch.clientY - 15}px`;
-      chip.style.zIndex = '9999';
-    });
-    chip.addEventListener('touchend', (e) => {
-      chip.style.position = ''; chip.style.left = ''; chip.style.top = ''; chip.style.zIndex = '';
-      const touch = e.changedTouches[0];
-      const elem = document.elementFromPoint(touch.clientX, touch.clientY);
-      const dz = elem ? elem.closest('.drop-zone') : null;
-      if(dz){
-        const dzType = dz.id === 'dz-good' ? 'good' : 'bad';
-        dropLogic(chip, dz, dzType);
-      }
-    });
-    
-    pool.appendChild(chip);
+  const pool=document.getElementById('words-pool');
+  const good=document.getElementById('zone-good');
+  const bad=document.getElementById('zone-bad');
+  const total=pool.children.length+good.querySelectorAll('.word-chip').length+bad.querySelectorAll('.word-chip').length;
+  if(total>0)return;
+  document.getElementById('s3-confirm-wrap').style.display='none';
+  document.getElementById('s3-check-btn').style.display='flex';
+  const shuffled=[...WORDS_DATA].sort(()=>Math.random()-.5);
+  shuffled.forEach(w=>{
+    const chip=document.createElement('div');
+    chip.className='word-chip'; chip.textContent=w.t; chip.dataset.correct=w.c;
+    chip.draggable=true;
+    chip.addEventListener('dragstart',()=>{dragChip=chip;setTimeout(()=>chip.classList.add('dragging'),0);});
+    chip.addEventListener('dragend',()=>chip.classList.remove('dragging'));
+    addTouch(chip); pool.appendChild(chip);
   });
 }
-function allowDrop(e){ e.preventDefault(); }
-function dragEnter(e){ const dz=e.target.closest('.drop-zone'); if(dz) dz.classList.add('over'); }
-function dragLeave(e){ const dz=e.target.closest('.drop-zone'); if(dz) dz.classList.remove('over'); }
-function handleDrop(e, targetType){
-  e.preventDefault();
-  const dz = e.target.closest('.drop-zone');
-  if(dz) dz.classList.remove('over');
-  const id = e.dataTransfer.getData('text/plain');
-  const chip = document.getElementById(id);
-  if(chip && dz) dropLogic(chip, dz, targetType);
+function addTouch(chip){
+  let clone=null;
+  chip.addEventListener('touchstart',e=>{
+    const t=e.touches[0]; clone=chip.cloneNode(true);
+    clone.style.cssText=`position:fixed;z-index:9999;opacity:.85;pointer-events:none;top:${t.clientY-18}px;left:${t.clientX-50}px;`;
+    document.body.appendChild(clone); dragChip=chip; chip.classList.add('dragging'); e.preventDefault();
+  },{passive:false});
+  chip.addEventListener('touchmove',e=>{
+    const t=e.touches[0];
+    if(clone){clone.style.top=(t.clientY-18)+'px';clone.style.left=(t.clientX-50)+'px';} e.preventDefault();
+  },{passive:false});
+  chip.addEventListener('touchend',e=>{
+    if(clone){clone.remove();clone=null;} chip.classList.remove('dragging');
+    const t=e.changedTouches[0]; const el=document.elementFromPoint(t.clientX,t.clientY);
+    const z=el?.closest('.drop-zone');
+    if(z) dropWordTo(chip,z.id==='zone-good'?'good':'bad');
+    dragChip=null;
+  });
 }
-function dropLogic(chip, dz, targetType){
-  const chipType = chip.getAttribute('data-type');
-  const fb = document.getElementById('s3-fb');
-  
-  if(chipType === targetType){
-    dz.appendChild(chip);
-    chip.setAttribute('draggable', 'false');
-    chip.className = 'word-chip chip-ok';
-    s3CorrectCount++;
-    fb.className = 'toast t-ok show'; fb.textContent = `Doğru eşleştirme! (${s3CorrectCount}/${POOL_WORDS.length})`;
-    if(s3CorrectCount === POOL_WORDS.length){
-      document.getElementById('s3-btn').disabled = false;
-      fb.textContent = 'Harika! Tüm kelimeler ait oldukları yere ulaştı efendim ✓';
-    }
+function dropToZone(e,zid){ e.preventDefault(); document.querySelectorAll('.drop-zone').forEach(z=>z.classList.remove('over')); if(dragChip) dropWordTo(dragChip,zid); }
+function dropToPool(e){ e.preventDefault(); if(dragChip) document.getElementById('words-pool').appendChild(dragChip); }
+function dropWordTo(chip,zid){ document.getElementById('zone-'+zid).appendChild(chip); }
+
+function checkS3(){
+  const good=[...document.getElementById('zone-good').querySelectorAll('.word-chip')];
+  const bad=[...document.getElementById('zone-bad').querySelectorAll('.word-chip')];
+  const pool=[...document.getElementById('words-pool').querySelectorAll('.word-chip')];
+  const fb=document.getElementById('s3-fb');
+  if(pool.length>0){ setToast(fb,'err','⚠️ Tüm kelimeleri kutulara yerleştirin!'); return; }
+
+  let allOk=true;
+  const wrongWords=[];
+  [...good,...bad].forEach(chip=>{
+    const exp=chip.dataset.correct;
+    const inZone=chip.closest('#zone-good')?'good':'bad';
+    if(exp!==inZone){ chip.classList.add('chip-wrong'); allOk=false; wrongWords.push(chip.textContent); }
+    else { chip.classList.add('chip-ok'); }
+  });
+
+  if(allOk){
+    setToast(fb,'ok','🎉 Mükemmel! Tüm kelimeler doğru yerinde!');
+    setTimeout(()=>completeStation(3),900);
   } else {
-    chip.classList.add('chip-wrong');
-    fb.className = 'toast t-err show'; fb.textContent = 'Bu kelime o kutuya ait değil, tekrar deneyin.';
-    setTimeout(() => chip.classList.remove('chip-wrong'), 800);
+    setToast(fb,'');
+    G.data.s3WrongWords=wrongWords;
+    document.getElementById('s3-confirm-wrap').style.display='block';
+    document.getElementById('s3-check-btn').style.display='none';
   }
 }
-
-// STATION 4 MANTIĞI
-function checkS4(){
-  const val = document.getElementById('s4-ans').value.trim().toUpperCase();
-  const comp = document.getElementById('s4-comp');
-  const st = document.getElementById('s4-status');
-  comp.className = 'answer-compare show';
-  
-  G.data.cipher = val;
-  if(val === 'EMPATİ'){
-    st.textContent = 'Kilit Kırıldı! Teşrik ederiz, doğru kelime: EMPATİ ✓'; st.className = 'ac-val ac-correct';
-    document.getElementById('s4-btn').disabled = false;
-  } else {
-    st.textContent = 'Şifre Uyuşmuyor. İpucunu inceleyin.'; st.className = 'ac-val';
-    document.getElementById('s4-btn').disabled = true;
-  }
+function resetS3(){
+  const pool=document.getElementById('words-pool');
+  const good=document.getElementById('zone-good');
+  const bad=document.getElementById('zone-bad');
+  [...good.querySelectorAll('.word-chip'),...bad.querySelectorAll('.word-chip')].forEach(c=>{
+    c.classList.remove('chip-wrong','chip-ok'); pool.appendChild(c);
+  });
+  document.getElementById('s3-confirm-wrap').style.display='none';
+  document.getElementById('s3-check-btn').style.display='flex';
+  setToast(document.getElementById('s3-fb'),'info','🔄 Kelimeler sıfırlandı. Tekrar deneyin!');
 }
 
-// STATION 5 MANTIĞI
-function selS5(card, opt){
-  document.querySelectorAll('#scr-s5 .s-opt').forEach(c => c.classList.remove('sel-any'));
-  card.classList.add('sel-any');
-  G.data.s5Opt = opt;
-  document.getElementById('s5-btn').disabled = false;
+// ═══════════════════════════════
+// S5 – SCENARIO
+// ═══════════════════════════════
+function selOpt(el,val){
+  document.querySelectorAll('.s-opt').forEach(o=>o.classList.remove('sel-any'));
+  el.classList.add('sel-any'); G.data.scenario=val;
+  const fb=document.getElementById('s5-fb');
+  setToast(fb,'info','✅ Ekibinizin seçimi kaydedildi!');
+  setTimeout(()=>completeStation(5),800);
 }
 
-// STATION 6 MANTIĞI
+// ═══════════════════════════════
+// S6
+// ═══════════════════════════════
 function checkS6(){
-  const pr = document.getElementById('s6-promise').value.trim();
-  const prev = document.getElementById('promise-prev');
-  G.data.promise = pr;
-  
-  if(pr.length > 8){
-    prev.style.display = 'block'; prev.textContent = `"${pr}"`;
-    if(G.data.photo6) document.getElementById('s6-btn').disabled = false;
-  } else {
-    prev.style.display = 'none';
-    document.getElementById('s6-btn').disabled = true;
-  }
+  const p=document.getElementById('promise-txt').value.trim();
+  const prev=document.getElementById('promise-prev');
+  document.getElementById('s6-btn').disabled=p.length<10;
+  if(p.length>=10){ prev.style.display='block'; prev.textContent='💚 "'+p+'"'; }
+  else { prev.style.display='none'; }
 }
 
-// TAMAMLAMA VE ÖDÜL MODAL MANTIĞI
-function completeStation(id){
-  if(id === G.unlockedStation && G.unlockedStation < 6){
-    G.unlockedStation = id + 1;
-  }
-  
-  if(id === 6){
-    buildCertificateScreen();
-    showScreen('scr-cert');
-    triggerConfetti();
-  } else {
-    openCelModal(id);
-  }
-}
-
-function openCelModal(id){
-  const titles = ['Harika Başlangıç!','Muhteşem Akıl Yürütme!','Kelimelerin Hakimi!','Şifre Çözücü Efendi!','Adalet ve Sağduyu!'];
-  document.getElementById('cel-title').textContent = titles[id-1] || 'Tebrikler!';
+// ═══════════════════════════════
+// COMPLETE STATION
+// ═══════════════════════════════
+function completeStation(n){
+  if(n===2) G.data.riddle=document.getElementById('riddle-ans').value;
+  if(n===4) G.data.cipher=document.getElementById('cipher-ans').value;
+  if(n===6) G.data.promise=document.getElementById('promise-txt').value;
+  if(!G.done.includes(n)) G.done.push(n);
+  if(n<6) G.curStation=n+1;
+  const msgs=[
+    {e:'🌟',t:'Harika!',s:'1. İstasyon tamamlandı! Empatin tescillendi.'},
+    {e:'🔮',t:'Düşünceli!',s:'2. İstasyon tamamlandı! Bilmece cevaplandı.'},
+    {e:'🎯',t:'Mükemmel!',s:'3. İstasyon tamamlandı! Kelimeler yerini buldu.'},
+    {e:'🔑',t:'Şifre Kırıldı!',s:'4. İstasyon tamamlandı! Empati derinleşti.'},
+    {e:'⚡',t:'Cesur Seçim!',s:'5. İstasyon tamamlandı! Akran nezaketi yaşandı.'},
+    {e:'🏆',t:'Efsane Ekip!',s:'Tüm 6 istasyon tamamlandı! Sertifikanız hazır.'},
+  ];
+  const m=msgs[n-1];
+  document.getElementById('cel-e').textContent=m.e;
+  document.getElementById('cel-t').textContent=m.t;
+  document.getElementById('cel-s').textContent=m.s;
   document.getElementById('cel-ov').classList.add('show');
-  triggerConfetti();
+  spawnConfetti();
 }
-function closeCelModal(){
+function closeCel(){
   document.getElementById('cel-ov').classList.remove('show');
-  goMap();
+  if(G.done.length===6){ renderCert(); show('scr-cert'); spawnConfetti(); }
+  else goMap();
 }
+function finishGame(){ completeStation(6); }
 
-// SEREMONİ EKRANINI DOLDURMA
-function buildCertificateScreen(){
-  document.getElementById('c-team-nm').textContent = G.teamName.toUpperCase();
-  document.getElementById('c-mascot-ic').textContent = G.mascotIcon;
-  document.getElementById('c-mascot-nm').textContent = G.mascotName;
-  document.getElementById('c-promise').textContent = `"${G.data.promise}"`;
-  document.getElementById('c-date').textContent = new Date().toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'});
-  
-  const mDiv = document.getElementById('c-members'); mDiv.innerHTML = '';
-  G.members.forEach(m => {
-    const s = document.createElement('span'); s.className = 'cert-mem'; s.textContent = m;
-    mDiv.appendChild(s);
+// ═══════════════════════════════
+// CERTIFICATE RENDER
+// ═══════════════════════════════
+function renderCert(){
+  document.getElementById('cert-team-nm').textContent=G.teamName;
+  document.getElementById('cert-mascot-ic').textContent=G.mascotIcon;
+  document.getElementById('cert-mascot-nm').textContent=G.mascotName;
+  document.getElementById('cert-p-txt').textContent=G.data.promise||'—';
+  const mEl=document.getElementById('cert-members'); mEl.innerHTML='';
+  G.members.forEach(m=>{ const t=document.createElement('div'); t.className='cert-mem'; t.textContent=m; mEl.appendChild(t); });
+  const now=new Date();
+  document.getElementById('cert-date').textContent=now.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+  // Summary
+  const si=document.getElementById('sum-items'); si.innerHTML='';
+  const rows=[
+    {ic:'📸',lb:'1. İstasyon – Fotoğraf', vl:G.data.photo1?'✓ Fotoğraf yüklendi':'—'},
+    {ic:'🔮',lb:'2. İstasyon – Bilmece Cevabı', vl:G.data.riddle||'—'},
+    {ic:'🎯',lb:'3. İstasyon – Kelime Oyunu', vl:G.done.includes(3)?'✓ Tamamlandı':'—'},
+    {ic:'🔐',lb:'4. İstasyon – Şifre', vl:G.data.cipher||'—'},
+    {ic:'⚖️',lb:'5. İstasyon – Senaryo Seçimi', vl:G.data.scenario?G.data.scenario+' şıkkı seçildi':'—'},
+    {ic:'🏆',lb:'6. İstasyon – Nezaket Sözü', vl:G.data.promise||'—'},
+  ];
+  rows.forEach(r=>{ const d=document.createElement('div'); d.className='sum-item';
+    d.innerHTML=`<div class="sum-ic">${r.ic}</div><div><div class="sum-lbl">${r.lb}</div><div class="sum-val">${r.vl}</div></div>`;
+    si.appendChild(d);
   });
-  
-  // Özet metinleri
-  document.getElementById('sum-s2').textContent = G.data.riddle.substring(0,35) + (G.data.riddle.length>35?'...':'');
-  document.getElementById('sum-s4').textContent = 'Kırılan Kod: ' + G.data.cipher;
-  const s5OptsText = ['','Pasif Kalındı','Agresif Müdahale','Yapıcı Destek ve Bildirim ✓'];
-  document.getElementById('sum-s5').textContent = s5OptsText[G.data.s5Opt] || 'Seçim Yapıldı';
 }
 
-// CONFETTI EFECT
-function triggerConfetti(){ for(let i=0;i<40;i++) spawnConfetti(); }
-function spawnConfetti(){
-  const cols = ['#4C9EEB','#A78BFA','#3DD68C','#F59E0B','#EF4444','#22D3EE'];
-  const p = document.createElement('div'); p.className = 'cfp';
-  p.style.background = cols[Math.floor(Math.random()*cols.length)];
-  p.style.left = Math.random()*100 + 'vw';
-  p.style.top = '-5vh';
-  const w = Math.random()*7+5; p.style.width = w+'px'; p.style.height = (Math.random()*4+8)+'px';
-  p.style.transform = `rotate(${Math.random()*360}deg)`;
-  p.style.animationDuration = (Math.random()*2+1.5)+'s';
-  document.body.appendChild(p);
-  setTimeout(() => p.remove(), 3500);
-}
-
-function resetGame(){
-  if(confirm('Mevcut oyunu sıfırlamak ve en başa dönmek istediğinize emin misiniz?')){
-    location.reload();
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════════════
-// BAŞTAN YAZILAN YATAY (LANDSCAPE) 3 SAYFA PDF OLUŞTURMA FONKSİYONU
-// ══════════════════════════════════════════════════════════════════════════
-async function downloadPDF() {
-  const spin = document.getElementById('pdf-spin');
+// ═══════════════════════════════
+// PDF – 2 PAGES, CANVAS-BASED
+// ═══════════════════════════════
+async function downloadPDF(){
+  const spin=document.getElementById('pdf-spin');
   spin.classList.add('show');
-  await new Promise(r => setTimeout(r, 100));
+  await new Promise(r=>setTimeout(r,60));
+  try{
+    // Use canvas to draw everything → avoids font encoding issues
+    const W=595, H=842; // A4 pt
+    const canvas=document.createElement('canvas');
+    canvas.width=W*2; canvas.height=H*6; // 2x retina, 3 sayfa stack (sertifika, özet, QR)
+    const ctx=canvas.getContext('2d');
+    ctx.scale(2,2);
 
-  try {
-    // A4 Yatay (Landscape) Ölçüleri: 842 x 595 pt
-    const W = 842; 
-    const H = 595;
-    const canvas = document.createElement('canvas');
-    canvas.width = W * 2; canvas.height = H * 6; // Toplam 3 Sayfalık dikey şerit (Yüksek çözünürlük için x2)
-    const ctx = canvas.getContext('2d');
-    ctx.scale(2, 2);
-
-    // YARDIMCI ÇİZİM ARAÇLARI
-    function fillRect(x, y, w, h, color) { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); }
-    function rect(x, y, w, h, color, lw = 1) { ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.strokeRect(x, y, w, h); }
-    function text(str, x, y, size, color, align, font) {
-      ctx.font = `${font || '700'} ${size}px Inter, Arial, sans-serif`;
-      ctx.fillStyle = color; ctx.textAlign = align || 'left'; ctx.fillText(str, x, y);
+    // ── YARDIMCI FONKSİYONLAR ──────────────
+    function fillRect(x,y,w,h,color){ ctx.fillStyle=color; ctx.fillRect(x,y,w,h); }
+    function rect(x,y,w,h,color,lw=1){ ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.strokeRect(x,y,w,h); }
+    function line(x1,y1,x2,y2,color='#BBBBBB',lw=0.5){ ctx.strokeStyle=color; ctx.lineWidth=lw; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); }
+    function text(str,x,y,size,color,align,font){
+      ctx.font=`${font||'700'} ${size}px Inter,Arial,sans-serif`;
+      ctx.fillStyle=color; ctx.textAlign=align||'left'; ctx.fillText(str,x,y);
     }
-    function wrapText(str, x, y, maxW, lineH, size, color, align, font) {
-      ctx.font = `${font || '600'} ${size}px Inter, Arial, sans-serif`;
-      ctx.fillStyle = color; ctx.textAlign = align || 'left';
-      const words = str.split(' '); let line = '';
-      for (let i = 0; i < words.length; i++) {
-        const test = line + (line ? ' ' : '') + words[i];
-        if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line, x, y); line = words[i]; y += lineH; }
-        else line = test;
+    function wrapText(str,x,y,maxW,lineH,size,color,align,font){
+      ctx.font=`${font||'600'} ${size}px Inter,Arial,sans-serif`;
+      ctx.fillStyle=color; ctx.textAlign=align||'left';
+      const words=str.split(' '); let line='';
+      for(let i=0;i<words.length;i++){
+        const test=line+(line?' ':'')+words[i];
+        if(ctx.measureText(test).width>maxW&&line){ ctx.fillText(line,x,y); line=words[i]; y+=lineH; }
+        else line=test;
       }
-      if (line) ctx.fillText(line, x, y);
+      if(line) ctx.fillText(line,x,y);
       return y;
     }
-    function drawImgFit(src, x, y, maxW, maxH) {
-      return new Promise(res => {
-        const img = new Image();
-        img.onload = () => {
-          const ratio = img.naturalWidth / img.naturalHeight;
-          let dw = maxW, dh = maxW / ratio;
-          if (dh > maxH) { dh = maxH; dw = maxH * ratio; }
-          ctx.drawImage(img, x + (maxW - dw) / 2, y + (maxH - dh) / 2, dw, dh);
-          res();
+    // Fotoğraflar — orijinal en/boy oranı korunarak çiz
+    function drawImgFit(src,x,y,maxW,maxH){
+      return new Promise(res=>{
+        const img=new Image();
+        img.onload=()=>{
+          const ratio=img.naturalWidth/img.naturalHeight;
+          let dw=maxW, dh=maxW/ratio;
+          if(dh>maxH){ dh=maxH; dw=maxH*ratio; }
+          const ox=x+(maxW-dw)/2;
+          ctx.drawImage(img,ox,y,dw,dh);
+          res(dh);
         };
-        img.onerror = () => res();
-        img.src = src;
+        img.onerror=()=>res(maxH);
+        img.src=src;
       });
     }
 
-    const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+    const dateStr=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
 
-    // ── SAYFA 1: BİRLEŞTİRİLMİŞ SÜPER YATAY SERTİFİKA ──────────────────
-    const p1y = 0;
-    fillRect(0, p1y, W, H, '#FFFFFF'); // Arka Plan Beyaz
-    
-    // Kenarlıklar (Diplomasi/Sertifika Çerçevesi)
-    rect(20, p1y + 20, W - 40, H - 40, '#1A1A1A', 2);
-    rect(25, p1y + 25, W - 50, H - 50, '#CCCCCC', 0.5);
+    // ── SAYFA 1 – SERTİFİKA (BEYAZ / BASKIYA UYGUN) ───────────────
+    const p1y=0;
+    fillRect(0,p1y,W,H,'#FFFFFF'); // Beyaz zemin
 
-    // Köşe L-Süslemeleri
-    fillRect(20, p1y+20, 40, 5, '#1A1A1A'); fillRect(20, p1y+20, 5, 40, '#1A1A1A'); // Sol Üst
-    fillRect(W-60, p1y+20, 40, 5, '#1A1A1A'); fillRect(W-25, p1y+20, 5, 40, '#1A1A1A'); // Sağ Üst
-    fillRect(20, p1y+H-25, 40, 5, '#1A1A1A'); fillRect(20, p1y+H-60, 5, 40, '#1A1A1A'); // Sol Alt
-    fillRect(W-60, p1y+H-25, 40, 5, '#1A1A1A'); fillRect(W-25, p1y+H-60, 5, 40, '#1A1A1A'); // Sağ Alt
+    // Üst dekoratif bant — ince çizgiler
+    fillRect(0,p1y,W,8,'#1A1A1A');
+    fillRect(0,p1y+8,W,3,'#555555');
 
-    // Başlık Katmanı
-    text('🌟', W / 2, p1y + 65, 36, '#1A1A1A', 'center', '900');
-    text('NEZAKET ELÇİLERİ AKRAN ORYANTİRİNGİ', W / 2, p1y + 90, 11, '#666666', 'center', '700');
-    text('BAŞARI SERTİFİKASI', W / 2, p1y + 125, 34, '#1A1A1A', 'center', '900');
-    
-    text('Bu sertifika, 6 istasyonluk dijital oryantiring macerasını başarıyla tamamlayan', W / 2, p1y + 155, 13, '#555555', 'center', '500');
-    
-    // Ekip Adı
-    text(G.teamName.toUpperCase(), W / 2, p1y + 200, 38, '#4C9EEB', 'center', '900');
-    
-    // Ekip Üyeleri ve Maskot Bilgisi
-    const memStr = "Ekip Üyeleri: " + G.members.join(' • ');
-    text(memStr, W / 2, p1y + 225, 12, '#333333', 'center', '600');
-    text('Proje Maskotu: ' + G.mascotIcon + ' ' + G.mascotName, W / 2, p1y + 245, 12, '#666666', 'center', '600');
+    // Logo alanı
+    text('★',W/2,p1y+55,40,'#1A1A1A','center','900');
+    text('NEZAKET ELCİLERİ',W/2,p1y+75,10,'#555555','center','700');
+    text('Başarı Sertifikası',W/2,p1y+105,28,'#1A1A1A','center','900');
+    text('Dijital Oryantiring Tamamlandı ✓',W/2,p1y+125,11,'#666666','center','500');
 
-    // Ortak Nezaket Sözü/Taahhüt Kutusu
-    fillRect(W/2 - 260, p1y + 265, 520, 45, '#F9F9F9');
-    rect(W/2 - 260, p1y + 265, 520, 45, '#EEEEEE', 1);
-    text('EKİP NEZAKET TAAHHÜDÜ', W/2, p1y + 280, 8, '#888888', 'center', '800');
-    text(`"${G.data.promise}"`, W/2, p1y + 300, 12, '#1A1A1A', 'center', 'italic 600');
+    line(40,p1y+140,W-40,p1y+140,'#CCCCCC',1);
 
-    // İSTASYON ÖZETLERİ (Grid 3x2) - ARTIK 1. SAYFA İÇİNDE ENTEGRE
-    const startX = 55;
-    const startY = 330;
-    const boxW = 234;
-    const boxH = 75;
-    const gap = 15;
+    // EKİP BİLGİSİ
+    text('EKİP ADI',W/2,p1y+165,9,'#888888','center','700');
+    text(G.teamName,W/2,p1y+198,30,'#1A1A1A','center','900');
+    const memStr=G.members.join('  •  ');
+    text(memStr,W/2,p1y+220,11,'#333333','center','600');
+    text(G.mascotIcon+'  '+G.mascotName,W/2,p1y+240,12,'#666666','center','600');
 
-    const summaryData = [
-      {ic:'📸', lb:'1. Tanışma Görevi', vl: 'Yeni bir akranla tanışıldı & empati köprüleri fotoğraf karesiyle kuruldu ✓'},
-      {ic:'🔮', lb:'2. Bilmece Çözümü', vl: G.data.riddle ? 'Yorum: ' + G.data.riddle : 'Sözün gücü bilmecesi çözüldü ✓'},
-      {ic:'🎯', lb:'3. Kelime Ayrıştırma', vl: 'Nezaketi besleyen ve zorbalığı tetikleyen unsurlar doğru ayrıştırıldı ✓'},
-      {ic:'🔐', lb:'4. Perspektif Şifresi', vl: G.data.cipher ? 'Çözülen Kod: ' + G.data.cipher + ' (Sezar Şifresi Kırıldı ✓)' : 'Empati gizli şifresi başarıyla kırıldı ✓'},
-      {ic:'⚖️', lb:'5. Kriz Masası', vl: 'Siber zorbalık durumunda en sağduyulu ve yapıcı davranış modeli seçildi ✓'},
-      {ic:'🏆', lb:'6. Final Kararı', vl: 'Geleceğe kalıcı bir nezaket sözü verilerek anıt başarıyla tamamlandı ✓'}
+    line(40,p1y+256,W-40,p1y+256,'#CCCCCC',1);
+
+    // NEZAKET SÖZI kutusu — çerçeveli
+    fillRect(40,p1y+268,W-80,88,'#F5F5F5');
+    fillRect(40,p1y+268,3,88,'#1A1A1A');
+    rect(40,p1y+268,W-80,88,'#CCCCCC',0.8);
+    text('NEZAKET SÖZÜMÜZ',52,p1y+286,9,'#333333','left','700');
+    const promise=G.data.promise||'—';
+    wrapText('"'+promise+'"',52,p1y+306,W-105,18,12,'#1A1A1A','left','600');
+
+    line(40,p1y+372,W-40,p1y+372,'#CCCCCC',1);
+
+    // Tarih & okul
+    text(dateStr,W/2,p1y+393,11,'#888888','center','500');
+
+    // Dekoratif rozet alanı — istasyon ikonları
+    const icons=['📸','🔮','🎯','🔐','⚖️','🏆'];
+    const iconSpacing=(W-80)/6;
+    ctx.font='16px Inter,Arial,sans-serif'; ctx.textAlign='center';
+    for(let i=0;i<6;i++){
+      ctx.fillText(icons[i], 40+iconSpacing*i+iconSpacing/2, p1y+435);
+    }
+    const labels=['Empati','Bilmece','Kelime','Şifre','Kriz','Söz'];
+    for(let i=0;i<6;i++){
+      text(labels[i],40+iconSpacing*i+iconSpacing/2,p1y+450,7,'#AAAAAA','center','600');
+    }
+    // Tamamlandı damgası
+    fillRect(W/2-60,p1y+460,120,26,'#F0FFF6'); rect(W/2-60,p1y+460,120,26,'#3DD68C',1);
+    text('6/6 İSTASYON TAMAMLANDI ✓',W/2,p1y+477,8,'#2A8A5A','center','800');
+
+    line(40,p1y+494,W-40,p1y+494,'#CCCCCC',1);
+    text('Nezaket Sahibi Akranlar',W/2,p1y+H-18,11,'#888888','center','600');
+
+    // Alt bant
+    fillRect(0,p1y+H-8,W,8,'#1A1A1A');
+
+    // ── SAYFA 2 – AKTİVİTE ÖZETİ & FOTOĞRAFLAR ──────────────────
+    const p2y=H;
+    fillRect(0,p2y,W,H,'#FFFFFF');
+    fillRect(0,p2y,W,8,'#1A1A1A');
+
+    text('Ekip Aktivite Özeti',40,p2y+38,18,'#1A1A1A','left','800');
+    text('Nezaket Sahibi Akranlar – Dijital Oryantiring  |  '+G.teamName,40,p2y+56,10,'#666666','left','500');
+    line(40,p2y+68,W-40,p2y+68,'#CCCCCC',1);
+
+    // İstasyon özeti — sol sütun
+    const sumRows=[
+      {ic:'📸',lb:'1. İstasyon – Tanışma & Fotoğraf',vl:G.data.photo1?'Fotoğraf çekildi ✓':'Tamamlandı'},
+      {ic:'🔮',lb:'2. İstasyon – Bilmece',vl:G.data.riddle||'—'},
+      {ic:'🎯',lb:'3. İstasyon – Kelime Oyunu',vl:G.data.s3WrongWords?.length?'Bazı hatalar: '+G.data.s3WrongWords.join(', '):'Tüm kelimeler doğru ✓'},
+      {ic:'🔐',lb:'4. İstasyon – Şifre',vl:(G.data.cipher||'—')+' → Doğru: "Nezaket anlamaktır"'},
+      {ic:'⚖️',lb:'5. İstasyon – Kriz',vl:G.data.scenario?G.data.scenario+' şıkkı'+(G.data.scenario==='C'?' ✓ (En iyi)':' (Optimal: C)'):'—'},
+      {ic:'🏆',lb:'6. İstasyon – Söz',vl:G.data.promise||'—'},
     ];
 
-    summaryData.forEach((item, i) => {
-      const col = i % 3;
-      const row = Math.floor(i / 3);
-      const bx = startX + col * (boxW + gap);
-      const by = startY + row * (boxH + gap);
-
-      fillRect(bx, by, boxW, boxH, '#FCFCFC');
-      rect(bx, by, boxW, boxH, '#EBEBEB', 0.5);
-      text(item.ic + ' ' + item.lb, bx + 10, by + 18, 9.5, '#4C9EEB', 'left', '800');
-      wrapText(item.vl, bx + 10, by + 34, boxW - 20, 13, 8.5, '#555555', 'left', '500');
+    let sy=p2y+82;
+    sumRows.forEach((r)=>{
+      fillRect(40,sy,W-80,36,'#F8F8F8');
+      rect(40,sy,W-80,36,'#E0E0E0',0.6);
+      fillRect(40,sy,3,36,'#1A1A1A');
+      text(r.lb,52,sy+13,9,'#555555','left','700');
+      wrapText(r.vl,52,sy+26,W-108,13,10,'#1A1A1A','left','600');
+      sy+=40;
     });
 
-    // Sayfa Sonu İmzası/Alt Bilgiler
-    text(dateStr, 55, p1y + H - 40, 10, '#999999', 'left', '500');
-    text('Nezaket Sahibi Akranlar Proje Komisyonu', W - 55, p1y + H - 40, 10, '#999999', 'right', '600');
-    fillRect(W/2 - 80, p1y + H - 32, 160, 2, '#1A1A1A'); // İnce süs çizgisi
+    // FOTOĞRAFLAR BÖLÜMÜ
+    sy+=12;
+    line(40,sy,W-40,sy,'#CCCCCC',1);
+    sy+=16;
+    text('📸  Ekip Fotoğrafları',40,sy,13,'#1A1A1A','left','800');
+    sy+=14;
+    line(40,sy,W-40,sy,'#CCCCCC',0.5);
+    sy+=10;
 
-    // ── SAYFA 2: SADECE FOTOĞRAFLAR (YATAY FOTO GALERİ) ─────────────────
-    const p2y = H;
-    fillRect(0, p2y, W, H, '#FFFFFF');
-    text('MACERA FOTOĞRAFLARI GALERİSİ', W/2, p2y + 55, 22, '#1A1A1A', 'center', '900');
-    
-    // Çizgi çizimi (Line entegrasyonu)
-    ctx.strokeStyle = '#EEEEEE'; ctx.lineWidth = 1; ctx.beginPath();
-    ctx.moveTo(100, p2y + 75); ctx.lineTo(W - 100, p2y + 75); ctx.stroke();
+    // Her iki fotoğrafı da çiz (photo1 = tanışma, photo6 = 6. istasyon varsa)
+    const photos=[];
+    if(G.data.photo1) photos.push({src:G.data.photo1,label:'1. İstasyon – Tanışma Fotoğrafı'});
+    if(G.data.photo6) photos.push({src:G.data.photo6,label:'6. İstasyon – Nezaket Anı'});
 
-    const photos = [];
-    if(G.data.photo1) photos.push({src: G.data.photo1, title: '1. İstasyon: İlk Tanışma ve Empati Anı'});
-    if(G.data.photo6) photos.push({src: G.data.photo6, title: '6. İstasyon: Kapanış ve Ekip Ruhu Karesi'});
-
-    if(photos.length > 0) {
-      const imgW = (W - 160) / photos.length;
-      const imgH = 360;
-      for(let i=0; i<photos.length; i++) {
-        const ix = 80 + i * (imgW + 0);
-        await drawImgFit(photos[i].src, ix, p2y + 105, imgW, imgH);
-        text(photos[i].title, ix + imgW/2, p2y + 105 + imgH + 28, 12, '#555555', 'center', '700');
-      }
+    if(photos.length===0){
+      fillRect(40,sy,W-80,50,'#F5F5F5'); rect(40,sy,W-80,50,'#DDDDDD',0.8);
+      text('Fotoğraf yüklenmedi',W/2,sy+30,11,'#AAAAAA','center','500');
+      sy+=58;
     } else {
-      text('Bu oryantiring yürüyüşünde fotoğraf kaydı gerçekleştirilmedi.', W/2, p2y + H/2, 15, '#BBBBBB', 'center', '500');
+      // Fotoğraflar yan yana (max 2) — orijinal oran korunur
+      const cols=photos.length; const imgW=(W-80-(cols-1)*10)/cols; const maxImgH=160;
+      let usedH=0;
+      for(let i=0;i<photos.length;i++){
+        const ix=40+i*(imgW+10);
+        const drawnH=await drawImgFit(photos[i].src,ix,sy,imgW,maxImgH);
+        rect(ix,sy,imgW,drawnH,'#CCCCCC',0.6);
+        text(photos[i].label,ix,sy+drawnH+11,8,'#666666','left','600');
+        if(drawnH>usedH) usedH=drawnH;
+      }
+      sy+=usedH+22;
     }
 
-    // ── SAYFA 3: DİJİTAL DOĞRULAMA (YATAY QR KOD) ─────────────────────
-    const p3y = H * 2;
-    fillRect(0, p3y, W, H, '#FFFFFF');
-    text('DİJİTAL DOĞRULAMA SİSTEMİ', W/2, p3y + 80, 22, '#1A1A1A', 'center', '900');
-    
-    // QR Bilgi paketi hazırlama
-    const qrText = JSON.stringify({ team: G.teamName, date: dateStr, members: G.members, result: "6/6 BAŞARILI" });
-    const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' + encodeURIComponent(qrText);
-    
-    try {
-      const qrResp = await fetch(qrApi);
-      const qrBlob = await qrResp.blob();
-      const qrUrl = URL.createObjectURL(qrBlob);
-      const qrImg = new Image();
-      await new Promise(res => { qrImg.onload = res; qrImg.src = qrUrl; });
-      ctx.drawImage(qrImg, W/2 - 140, p3y + 130, 280, 280);
-      rect(W/2 - 150, p3y + 120, 300, 300, '#EAEAEA', 1);
-    } catch(e) { console.error("QR Çizim hatası:", e); }
+    line(40,sy+4,W-40,sy+4,'#CCCCCC',1);
+    text('Nezaket Sahibi Akranlar',W/2,p2y+H-18,11,'#888888','center','600');
+    text(dateStr,40,p2y+H-18,11,'#888888','left','500');
+    fillRect(0,p2y+H-8,W,8,'#1A1A1A');
 
-    text('Bu QR kod, sertifikanın orijinalliğini ve ekip başarı kayıtlarını doğrulamak içindir.', W/2, p3y + 465, 11, '#888888', 'center', '500');
-    text('Nezaket Sahibi Akranlar Oryantiring®', W/2, p3y + 485, 11, '#BBBBBB', 'center', '600');
-
-    // ── PDF AKTARMA VE İNDİRME İŞLEMLERİ ─────────────────────────────
-    if(!window.jspdf) {
-      const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-      await new Promise(res => { s.onload = res; document.head.appendChild(s); });
+    // ── EXPORT ─────────────────────────────
+    // jsPDF yükle
+    if(!window.jspdf){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+        s.onload=res; s.onerror=()=>{
+          const s2=document.createElement('script');
+          s2.src='https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
+          s2.onload=res; s2.onerror=()=>rej(new Error('jsPDF kütüphanesi yüklenemedi'));
+          document.head.appendChild(s2);
+        };
+        document.head.appendChild(s);
+      });
     }
-    
-    const { jsPDF } = window.jspdf;
-    // 'l' parametresi PDF yapısını Landscape (Yatay) yapar.
-    const doc = new jsPDF({ orientation: 'l', unit: 'pt', format: 'a4' });
+    const {jsPDF}=window.jspdf;
 
-    // Sayfa 1 Aktarımı
-    const c1 = document.createElement('canvas'); c1.width = W*2; c1.height = H*2;
-    c1.getContext('2d').drawImage(canvas, 0, 0, W*2, H*2, 0, 0, W*2, H*2);
-    doc.addImage(c1.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, W, H);
+    // ── SAYFA 1: SERTİFİKA ────────────────
+    const c1=document.createElement('canvas'); c1.width=W*2; c1.height=H*2;
+    c1.getContext('2d').drawImage(canvas,0,0,W*2,H*2,0,0,W*2,H*2);
+    const c1data=c1.toDataURL('image/jpeg',0.92);
 
-    // Sayfa 2 Aktarımı
+    // ── SAYFA 2: ÖZET ─────────────────────
+    const c2=document.createElement('canvas'); c2.width=W*2; c2.height=H*2;
+    c2.getContext('2d').drawImage(canvas,0,H*2,W*2,H*2,0,0,W*2,H*2);
+    const c2data=c2.toDataURL('image/jpeg',0.92);
+
+    // ── QR KOD OLUŞTURMA (saf JS, sıfır bağımlılık) ──────────────
+    const qrPayload = {
+  type: "nesak-cert",
+  team: G.teamName,
+  members: G.members,
+  mascot: G.mascotName || "",
+  mascotIcon: G.mascotIcon || "",
+  promise: G.data.promise || "",
+  score: G.data.finalScore || 6,
+  date: dateStr
+};
+
+const qrText = JSON.stringify({
+  type: "nesak-cert",
+  team: G.teamName,
+  members: G.members,
+  mascot: G.mascotName || "",
+  mascotIcon: G.mascotIcon || "",
+  promise: G.data.promise || "",
+  score: G.data.finalScore || 6,
+  date: dateStr
+});
+
+async function makeQRCanvas(text){
+
+  const qrApi =
+    'https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=' +
+    encodeURIComponent(text);
+
+  const resp = await fetch(qrApi);
+
+  if(!resp.ok){
+    throw new Error("QR oluşturulamadı");
+  }
+
+  const blob = await resp.blob();
+
+  return await new Promise((resolve,reject)=>{
+
+    const img = new Image();
+
+    img.onload = () => {
+
+      const c = document.createElement("canvas");
+
+      c.width = img.width;
+      c.height = img.height;
+
+      c.getContext("2d").drawImage(img,0,0);
+
+      resolve(c.toDataURL("image/png"));
+
+    };
+
+    img.onerror = reject;
+
+    img.src = URL.createObjectURL(blob);
+
+  });
+
+}
+
+let qrDataUrl = null;
+
+try{
+  qrDataUrl = await makeQRCanvas(qrText);
+}catch(e){
+  console.error(e);
+  qrDataUrl = null;
+}
+
+    // ── SAYFA 3: QR SAYFASI ───────────────
+    const c3=document.createElement('canvas'); c3.width=W*2; c3.height=H*2;
+    const ctx3=c3.getContext('2d'); ctx3.scale(2,2);
+    ctx3.fillStyle='#FFFFFF'; ctx3.fillRect(0,0,W,H);
+    ctx3.fillStyle='#1A1A1A'; ctx3.fillRect(0,0,W,8);
+    ctx3.fillStyle='#555555'; ctx3.fillRect(0,8,W,3);
+
+    ctx3.textAlign='center';
+    ctx3.fillStyle='#1A1A1A';
+    ctx3.font='900 24px Inter,Arial,sans-serif';
+    ctx3.fillText('Sertifika QR Kodu',W/2,55);
+    ctx3.font='600 11px Inter,Arial,sans-serif';
+    ctx3.fillStyle='#666666';
+    ctx3.fillText('Bu kodu admin panelinde okutarak sertifikayı doğrudan yazdırabilirsiniz',W/2,76);
+
+    if(qrDataUrl){
+      const qrImg=new Image();
+      await new Promise(res=>{ qrImg.onload=res; qrImg.src=qrDataUrl; });
+      const qrSize=380;
+      const qx=(W-qrSize)/2, qy=110;
+      ctx3.fillStyle='#FFFFFF'; ctx3.fillRect(qx-12,qy-12,qrSize+24,qrSize+24);
+      ctx3.strokeStyle='#1A1A1A'; ctx3.lineWidth=1.5; ctx3.strokeRect(qx-12,qy-12,qrSize+24,qrSize+24);
+      ctx3.drawImage(qrImg,qx,qy,qrSize,qrSize);
+      ctx3.font='700 12px Inter,Arial,sans-serif';
+      ctx3.fillStyle='#333333';
+      ctx3.fillText(G.teamName,W/2,qy+qrSize+45);
+      ctx3.font='500 10px Inter,Arial,sans-serif';
+      ctx3.fillStyle='#888888';
+      ctx3.fillText(dateStr,W/2,qy+qrSize+62);
+    } else {
+      ctx3.font='600 13px Inter,Arial,sans-serif';
+      ctx3.fillStyle='#EF4444';
+      ctx3.fillText('QR kod oluşturulamadı',W/2,H/2);
+    }
+
+    ctx3.strokeStyle='#CCCCCC'; ctx3.lineWidth=1;
+    ctx3.beginPath(); ctx3.moveTo(40,H-40); ctx3.lineTo(W-40,H-40); ctx3.stroke();
+    ctx3.font='600 11px Inter,Arial,sans-serif';
+    ctx3.fillStyle='#888888';
+    ctx3.fillText('Nezaket Sahibi Akranlar',W/2,H-18);
+    ctx3.fillStyle='#1A1A1A'; ctx3.fillRect(0,H-8,W,8);
+
+    // ── ANA PDF: 3 SAYFA ──────────────────
+    const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'a4'});
+    doc.addImage(c1data,'JPEG',0,0,W,H);
     doc.addPage();
-    const c2 = document.createElement('canvas'); c2.width = W*2; c2.height = H*2;
-    c2.getContext('2d').drawImage(canvas, 0, H*2, W*2, H*2, 0, 0, W*2, H*2);
-    doc.addImage(c2.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, W, H);
-
-    // Sayfa 3 Aktarımı
+    doc.addImage(c2data,'JPEG',0,0,W,H);
     doc.addPage();
-    const c3 = document.createElement('canvas'); c3.width = W*2; c3.height = H*2;
-    c3.getContext('2d').drawImage(canvas, 0, H*4, W*2, H*2, 0, 0, W*2, H*2);
-    doc.addImage(c3.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, W, H);
+    doc.addImage(c3.toDataURL('image/jpeg',0.95),'JPEG',0,0,W,H);
 
-    doc.save(`Sertifika_${G.teamName.replace(/\s+/g,'_').toLowerCase()}.pdf`);
+    doc.save(`${G.teamName.replace(/\s+/g,'').toLowerCase()}nesak.pdf`);
 
-  } catch (err) {
+  }catch(err){
     console.error(err);
-    alert('PDF oluşturma aşamasında bir hata meydana geldi: ' + err.toString());
-  } finally {
+    const msg=(err&&(err.message||err.toString()))||'Bilinmeyen hata';
+    alert('PDF oluşturulurken hata: '+msg);
+  }finally{
     spin.classList.remove('show');
+  }
+}
+
+// ═══════════════════════════════
+// CONFETTI
+// ═══════════════════════════════
+function spawnConfetti(){
+  const cols=['#4C9EEB','#A78BFA','#3DD68C','#F59E0B','#EF4444','#22D3EE'];
+  for(let i=0;i<50;i++){
+    const p=document.createElement('div'); p.className='cfp';
+    p.style.left=Math.random()*100+'vw';
+    p.style.background=cols[Math.floor(Math.random()*cols.length)];
+    p.style.borderRadius=Math.random()>.5?'50%':'2px';
+    const s=5+Math.random()*7;
+    p.style.width=s+'px'; p.style.height=s+'px';
+    p.style.animationDuration=(1.2+Math.random()*2)+'s';
+    p.style.animationDelay=(Math.random()*.8)+'s';
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),3500);
   }
 }
 </script>
