@@ -323,7 +323,7 @@ textarea{resize:vertical;min-height:84px}
   </div>
   <div class="map-body">
     <div class="map-img-wrap" id="map-img-wrap">
-      <div class="map-ph"><div class="ph-i">🗺️</div><p>map.png yükleniyor…</p></div>
+      <div class="map-ph"><div class="ph-i">🗺️</div><p>Filigran yükleniyor…</p></div>
     </div>
     <!-- QR SCANNER - ÖN PLANDA -->
     <div class="qr-panel" style="border:2px solid var(--blue);box-shadow:0 0 18px var(--blue-glow)">
@@ -690,7 +690,7 @@ function renderMap(){
   const wrap=document.getElementById('map-img-wrap');
   const img=new Image();
   img.onload=()=>{wrap.innerHTML='';wrap.appendChild(img);img.style.width='100%';};
-  img.src='map.png';
+  img.src='map.gif';
   // station list
   const list=document.getElementById('st-list'); list.innerHTML='';
   ST_META.forEach(st=>{
