@@ -1198,22 +1198,18 @@ async function downloadPDF(){
     const c2data=c2.toDataURL('image/jpeg',0.92);
 
     // ── QR KOD OLUŞTURMA (saf JS, sıfır bağımlılık) ──────────────
-    const certID = 'NESAK-' + Date.now().toString(36).toUpperCase();
-    const certPayload = {
-      id: certID,
-      type:'nesak-cert',
-      team: G.teamName,
-      date: dateStr,
-      members: G.members,
-      promise: G.data.promise||'',
-      score: G.data.finalScore||6
-    };
-    try{ localStorage.setItem('nesak_cert_'+certID, JSON.stringify(certPayload)); }catch(e){}
+    const qrPayload = {
+  type: "nesak-cert",
+  team: G.teamName,
+  members: G.members,
+  mascot: G.mascotName || "",
+  mascotIcon: G.mascotIcon || "",
+  promise: G.data.promise || "",
+  score: G.data.finalScore || 6,
+  date: dateStr
+};
 
-    const qrContent = 'NESAK|'+certID+'|'+G.teamName+'|'+dateStr+'|'+(G.members||[]).join(',')+'|'+(G.data.promise||'');
-    const qrShort = qrContent.length > 200
-      ? 'NESAK|'+certID+'|'+G.teamName+'|'+dateStr
-      : qrContent;
+const qrText = JSON.stringify(qrPayload);
 
     async function makeQRCanvas(text){
       if(!window.qrcodegen){
@@ -1225,7 +1221,7 @@ async function downloadPDF(){
         });
       }
       const QRC = window.qrcodegen.QrCode;
-      const qr = QRC.encodeText(text, QRC.Ecc.LOW);
+      const qr = QRC.encodeText(text, QRC.Ecc.MEDIUM);
       const sz = qr.size;
       const scale = Math.floor(400/sz);
       const border = 4;
@@ -1242,7 +1238,7 @@ async function downloadPDF(){
 
     let qrDataUrl = null;
     try {
-      qrDataUrl = await makeQRCanvas(qrShort);
+      qrDataUrl = await makeQRCanvas(qrText);
     } catch(qrErr){
       console.error('QR hatası:', qrErr);
       qrDataUrl = null;
