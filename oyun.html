@@ -1198,42 +1198,54 @@ async function downloadPDF(){
     const c2data=c2.toDataURL('image/jpeg',0.92);
 
     // ── QR KOD OLUŞTURMA (saf JS, sıfır bağımlılık) ──────────────
-    const qrText = JSON.stringify({
+    const certID = 'NESAK-' + Date.now().toString(36).toUpperCase();
+    const certPayload = {
+      id: certID,
       type:'nesak-cert',
       team: G.teamName,
       date: dateStr,
       members: G.members,
       promise: G.data.promise||'',
       score: G.data.finalScore||6
-    });
+    };
+    try{ localStorage.setItem('nesak_cert_'+certID, JSON.stringify(certPayload)); }catch(e){}
 
-    // ── Google Charts API ile QR üret ──────────────────────────────
-    async function makeQRDataUrl(text){
-      const url='https://chart.googleapis.com/chart?cht=qr&chs=400x400&chld=L|1&chl='+encodeURIComponent(text);
-      const resp=await fetch(url);
-      if(!resp.ok) throw new Error('QR API hatası: '+resp.status);
-      const blob=await resp.blob();
-      const objUrl=URL.createObjectURL(blob);
-      return new Promise((res,rej)=>{
-        const img=new Image();
-        img.onload=()=>{
-          const c=document.createElement('canvas');
-          c.width=img.width; c.height=img.height;
-          c.getContext('2d').drawImage(img,0,0);
-          URL.revokeObjectURL(objUrl);
-          res(c.toDataURL('image/png'));
-        };
-        img.onerror=rej;
-        img.src=objUrl;
-      });
+    const qrContent = 'NESAK|'+certID+'|'+G.teamName+'|'+dateStr+'|'+(G.members||[]).join(',')+'|'+(G.data.promise||'');
+    const qrShort = qrContent.length > 200
+      ? 'NESAK|'+certID+'|'+G.teamName+'|'+dateStr
+      : qrContent;
+
+    async function makeQRCanvas(text){
+      if(!window.qrcodegen){
+        await new Promise((res,rej)=>{
+          const s=document.createElement('script');
+          s.src='https://cdn.jsdelivr.net/npm/qrcodegen@1.8.0/qrcodegen.js';
+          s.onload=res; s.onerror=rej;
+          document.head.appendChild(s);
+        });
+      }
+      const QRC = window.qrcodegen.QrCode;
+      const qr = QRC.encodeText(text, QRC.Ecc.LOW);
+      const sz = qr.size;
+      const scale = Math.floor(400/sz);
+      const border = 4;
+      const canvSize = (sz + border*2)*scale;
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = canvSize;
+      const ctx2 = cv.getContext('2d');
+      ctx2.fillStyle='#FFFFFF'; ctx2.fillRect(0,0,canvSize,canvSize);
+      ctx2.fillStyle='#000000';
+      for(let y=0;y<sz;y++) for(let x=0;x<sz;x++)
+        if(qr.getModule(x,y)) ctx2.fillRect((x+border)*scale,(y+border)*scale,scale,scale);
+      return cv.toDataURL('image/png');
     }
 
     let qrDataUrl = null;
     try {
-      qrDataUrl = await makeQRDataUrl(qrText);
+      qrDataUrl = await makeQRCanvas(qrShort);
     } catch(qrErr){
-      console.error('QR oluşturma hatası:',qrErr);
-      qrDataUrl=null;
+      console.error('QR hatası:', qrErr);
+      qrDataUrl = null;
     }
 
     // ── SAYFA 3: QR SAYFASI ───────────────
