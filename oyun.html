@@ -1207,123 +1207,30 @@ async function downloadPDF(){
       score: G.data.finalScore||6
     });
 
-    // Küçük/güvenilir saf-JS QR (sadece byte mode, mask 0, version auto 1-10, ECC-L)
-    function buildQR(str){
-      const bytes = Array.from(new TextEncoder().encode(str));
-      // ECC-L kapasiteleri (version 1-10)
-      const CAP=[0,19,34,55,80,108,136,156,194,232,274];
-      let ver=1; while(ver<=10&&CAP[ver]<bytes.length) ver++;
-      if(ver>10) return null;
-      const ECC_N=[0,7,10,15,20,26,36,40,48,60,72]; // ecc bytes
-      const size=17+4*ver;
-
-      // --- Galois Field 256 ---
-      const EXP=new Uint8Array(512), LOG=new Uint8Array(256);
-      let x=1; for(let i=0;i<255;i++){EXP[i]=x;LOG[x]=i;x=(x<<1)^(x&128?285:0);x&=255;} for(let i=255;i<512;i++) EXP[i]=EXP[i-255];
-      const mul=(a,b)=>a&&b?EXP[LOG[a]+LOG[b]]:0;
-      function polyMul(p,q){const r=new Uint8Array(p.length+q.length-1);for(let i=0;i<p.length;i++)for(let j=0;j<q.length;j++)r[i+j]^=mul(p[i],q[j]);return r;}
-      function eccGen(n){let g=new Uint8Array([1]);for(let i=0;i<n;i++)g=polyMul(g,[1,EXP[i]]);return g;}
-      function eccCalc(msg,n){const gen=eccGen(n);const out=new Uint8Array(msg.length+n);for(let i=0;i<msg.length;i++)out[i]=msg[i];for(let i=0;i<msg.length;i++){const c=out[i];if(c)for(let j=1;j<=n;j++)out[i+j]^=mul(gen[j-1]||gen[j]||0,c);}return out.slice(msg.length);}
-
-      // --- Bit stream ---
-      const bits=[];
-      const push=(v,n)=>{for(let i=n-1;i>=0;i--)bits.push((v>>i)&1);};
-      push(4,4); push(bytes.length,8);
-      bytes.forEach(b=>push(b,8));
-      push(0,4);
-      while(bits.length%8) bits.push(0);
-      const msg=[];
-      for(let i=0;i<bits.length;i+=8){let v=0;for(let j=0;j<8;j++)v=(v<<1)|(bits[i+j]||0);msg.push(v);}
-      const pads=[0xEC,0x11]; while(msg.length<CAP[ver]) msg.push(pads[msg.length%2]);
-      const ecc=Array.from(eccCalc(new Uint8Array(msg),ECC_N[ver]));
-      const allBytes=[...msg,...ecc];
-      const finalBits=[];
-      allBytes.forEach(b=>{for(let i=7;i>=0;i--)finalBits.push((b>>i)&1);});
-
-      // --- Matrix ---
-      const N=size;
-      const mat=Array.from({length:N},()=>new Int8Array(N).fill(-1));
-      const isFunc=Array.from({length:N},()=>new Uint8Array(N));
-      const set=(r,c,v)=>{mat[r][c]=v;isFunc[r][c]=1;};
-
-      // Finder + separator
-      const finder=(tr,tc)=>{
-        for(let r=0;r<7;r++)for(let c=0;c<7;c++) set(tr+r,tc+c,(r===0||r===6||c===0||c===6||r>=2&&r<=4&&c>=2&&c<=4)?1:0);
-        for(let i=-1;i<=7;i++){if(tr+i>=0&&tr+i<N){if(tc-1>=0)set(tr+i,tc-1,0);if(tc+7<N)set(tr+i,tc+7,0);}if(tc+i>=0&&tc+i<N){if(tr-1>=0)set(tr-1,tc+i,0);if(tr+7<N)set(tr+7,tc+i,0);}}
-      };
-      finder(0,0);finder(0,N-7);finder(N-7,0);
-
-      // Timing
-      for(let i=8;i<N-8;i++){set(6,i,i%2===0?1:0);set(i,6,i%2===0?1:0);}
-
-      // Dark module
-      set(4*ver+9,8,1);
-
-      // Alignment (ver>=2)
-      const ALN=[[],[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50]];
-      if(ver>=2){const ps=ALN[ver];for(const ar of ps)for(const ac of ps){if(isFunc[ar][ac]) continue;for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++) set(ar+dr,ac+dc,Math.abs(dr)===2||Math.abs(dc)===2||dr===0&&dc===0?1:0);}}
-
-      // Format info (ECC-L, mask 0: i*j%2+i*j%3===0)
-      // Precomputed for ECC-L mask-0: 0b111011111000100 = 0x77C4
-      const FMT=0x77C4;
-      const fmtBits=[];for(let i=14;i>=0;i--)fmtBits.push((FMT>>i)&1);
-      const fmtPos1=[[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],[7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]];
-      fmtPos1.forEach(([r,c],i)=>set(r,c,fmtBits[i]));
-      const fmtPos2=[[N-1,8],[N-2,8],[N-3,8],[N-4,8],[N-5,8],[N-6,8],[N-7,8],[N-8,8],[8,N-8],[8,N-7],[8,N-6],[8,N-5],[8,N-4],[8,N-3],[8,N-2]];
-      fmtPos2.forEach(([r,c],i)=>set(r,c,fmtBits[i]));
-
-      // Data placement (zigzag)
-      let di=0;
-      for(let right=N-1;right>=1;right-=2){
-        if(right===6) right=5;
-        for(let vert=0;vert<N;vert++){
-          const row=(right>=5?(vert):N-1-vert);
-          for(let lr=0;lr<2;lr++){
-            const col=right-lr;
-            if(!isFunc[row][col]){
-              const bit=di<finalBits.length?finalBits[di++]:0;
-              // mask 0: (row+col)%2===0
-              mat[row][col]=(row+col)%2===0?bit^1:bit;
-            }
-          }
-        }
-        right-=2; if(right<1) break;
-        if(right===6) right=5;
-        for(let vert=N-1;vert>=0;vert--){
-          const row=vert;
-          for(let lr=0;lr<2;lr++){
-            const col=right-lr;
-            if(col>=0&&!isFunc[row][col]){
-              const bit=di<finalBits.length?finalBits[di++]:0;
-              mat[row][col]=(row+col)%2===0?bit^1:bit;
-            }
-          }
-        }
-      }
-      return {mat,size:N};
-    }
-
-    function renderQR(qrResult, canvasSize){
-      const qrCanvas2=document.createElement('canvas');
-      if(!qrResult){qrCanvas2.width=100;qrCanvas2.height=100;return qrCanvas2;}
-      const {mat,size}=qrResult;
-      const quiet=4;
-      const cellPx=Math.floor((canvasSize-quiet*2)/size);
-      const total=cellPx*size+quiet*2;
-      qrCanvas2.width=total; qrCanvas2.height=total;
-      const qctx=qrCanvas2.getContext('2d');
-      qctx.fillStyle='#FFFFFF'; qctx.fillRect(0,0,total,total);
-      qctx.fillStyle='#000000';
-      for(let r=0;r<size;r++) for(let c=0;c<size;c++) if(mat[r][c]===1) qctx.fillRect(quiet+c*cellPx,quiet+r*cellPx,cellPx,cellPx);
-      return qrCanvas2;
+    // ── Google Charts API ile QR üret ──────────────────────────────
+    async function makeQRDataUrl(text){
+      const url='https://chart.googleapis.com/chart?cht=qr&chs=400x400&chld=L|1&chl='+encodeURIComponent(text);
+      const resp=await fetch(url);
+      if(!resp.ok) throw new Error('QR API hatası: '+resp.status);
+      const blob=await resp.blob();
+      const objUrl=URL.createObjectURL(blob);
+      return new Promise((res,rej)=>{
+        const img=new Image();
+        img.onload=()=>{
+          const c=document.createElement('canvas');
+          c.width=img.width; c.height=img.height;
+          c.getContext('2d').drawImage(img,0,0);
+          URL.revokeObjectURL(objUrl);
+          res(c.toDataURL('image/png'));
+        };
+        img.onerror=rej;
+        img.src=objUrl;
+      });
     }
 
     let qrDataUrl = null;
     try {
-      const qrResult = buildQR(qrText);
-      if(!qrResult) throw new Error('Veri QR kapasitesini aşıyor');
-      const qrCvs = renderQR(qrResult, 420);
-      qrDataUrl = qrCvs.toDataURL('image/png');
+      qrDataUrl = await makeQRDataUrl(qrText);
     } catch(qrErr){
       console.error('QR oluşturma hatası:',qrErr);
       qrDataUrl=null;
