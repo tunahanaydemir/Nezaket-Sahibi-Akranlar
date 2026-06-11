@@ -229,7 +229,7 @@ textarea{resize:vertical;min-height:84px}
 
 /* ═══ CERTIFICATE SCREEN ═══ */
 #scr-cert{background:var(--bg);padding:18px 15px 40px;align-items:center}
-.cert-wrap{width:100%;max-width:420px}
+.cert-wrap{width:100%;max-width:420px;padding:16px 16px 30px}
 .cert-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:26px 20px;position:relative;overflow:hidden;margin-bottom:11px}
 .cert-glow{position:absolute;top:-50px;left:50%;transform:translateX(-50%);width:220px;height:110px;background:radial-gradient(ellipse,rgba(76,158,235,.18) 0%,transparent 70%);pointer-events:none}
 .cert-rainbow{height:3px;background:linear-gradient(90deg,var(--blue),var(--purple),var(--green),var(--orange));margin:-26px -20px 22px}
@@ -543,6 +543,8 @@ textarea{resize:vertical;min-height:84px}
 ════════════════════════════════════════ -->
 <div id="scr-cert" class="scr">
   <div class="cert-wrap">
+    <div id="pdf-spin" class="pdf-spin"><div class="spin-ring"></div> PDF oluşturuluyor…</div>
+    <button class="btn btn-purple" onclick="downloadPDF()" style="margin-bottom:14px;font-size:17px;padding:16px">⬇️ PDF Sertifika İndir</button>
     <div id="cert-card" class="cert-card">
       <div class="cert-glow"></div>
       <div class="cert-rainbow"></div>
@@ -573,8 +575,6 @@ textarea{resize:vertical;min-height:84px}
       <div class="sum-hdr">📋 Ekip Özeti</div>
       <div id="sum-items"></div>
     </div>
-    <div id="pdf-spin" class="pdf-spin"><div class="spin-ring"></div> PDF oluşturuluyor…</div>
-    <button class="btn btn-purple" onclick="downloadPDF()" style="margin-bottom:30px;font-size:17px;padding:16px">⬇️ PDF Sertifika İndir</button>
   </div>
 </div>
 
@@ -1179,7 +1179,7 @@ async function downloadPDF(){
         s.onload=res; s.onerror=()=>{
           const s2=document.createElement('script');
           s2.src='https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
-          s2.onload=res; s2.onerror=rej;
+          s2.onload=res; s2.onerror=()=>rej(new Error('jsPDF kütüphanesi yüklenemedi'));
           document.head.appendChild(s2);
         };
         document.head.appendChild(s);
@@ -1189,7 +1189,12 @@ async function downloadPDF(){
       await new Promise((res,rej)=>{
         const s=document.createElement('script');
         s.src='https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
-        s.onload=res; s.onerror=rej;
+        s.onload=res; s.onerror=()=>{
+          const s2=document.createElement('script');
+          s2.src='https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js';
+          s2.onload=res; s2.onerror=()=>rej(new Error('QRCode kütüphanesi yüklenemedi'));
+          document.head.appendChild(s2);
+        };
         document.head.appendChild(s);
       });
     }
@@ -1227,7 +1232,7 @@ async function downloadPDF(){
       });
       qrDataUrl=qrCanvas.toDataURL('image/png');
     }catch(qrErr){
-      console.error('QR oluşturma hatası (veri çok büyük olabilir):',qrErr);
+      console.error('QR oluşturma hatası (veri çok büyük olabilir):',qrErr&&qrErr.message?qrErr.message:qrErr);
       qrDataUrl=null;
     }
 
@@ -1287,7 +1292,8 @@ async function downloadPDF(){
 
   }catch(err){
     console.error(err);
-    alert('PDF oluşturulurken hata: '+err.message);
+    const msg=(err&&(err.message||err.toString()))||'Bilinmeyen hata';
+    alert('PDF oluşturulurken hata: '+msg);
   }finally{
     spin.classList.remove('show');
   }
