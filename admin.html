@@ -1,1 +1,412 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel – Nezaket Sahibi Akranlar</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D1018;--bg2:#141926;--bg3:#1C2333;--border:#263040;--border2:#334060;
+  --blue:#4C9EEB;--blue-dim:#152840;--green:#3DD68C;--green-dim:#0A2E1E;
+  --red:#EF4444;--red-dim:#2D0A0A;--orange:#F59E0B;
+  --text:#E8EDF8;--text2:#8A9AB8;--text3:#4A5875;
+  --r:14px;--rs:10px;--font:'Inter',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px 16px 40px}
+h1{font-size:22px;font-weight:900;margin-bottom:4px;text-align:center}
+.sub{font-size:13px;color:var(--text2);margin-bottom:24px;text-align:center}
 
+/* SCANNER CARD */
+.scanner-card{width:100%;max-width:480px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+.sc-hdr{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sc-hdr-icon{font-size:22px}
+.sc-hdr-title{font-size:15px;font-weight:800}
+.sc-hdr-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.sc-body{padding:18px}
+#reader{width:100%;border-radius:var(--rs);overflow:hidden;background:#000;min-height:220px;display:flex;align-items:center;justify-content:center}
+#reader video{border-radius:var(--rs)}
+
+/* DURUM */
+.status{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:var(--rs);font-size:13px;font-weight:600;margin-top:14px}
+.st-idle{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.st-ok{background:var(--green-dim);color:var(--green);border:1px solid rgba(61,214,140,.28)}
+.st-err{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.28)}
+.st-scan{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(76,158,235,.28);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* BUTONLAR */
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:13px 18px;border:none;border-radius:var(--rs);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:transform .12s,opacity .15s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-green{background:var(--green);color:#061a0f;box-shadow:0 4px 18px rgba(61,214,140,.28)}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 18px rgba(76,158,235,.28)}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:14px}
+.btn-ghost:hover{border-color:var(--text2);color:var(--text)}
+.btn-orange{background:var(--orange);color:#1a0d00}
+.gap{height:10px}
+
+/* SONUÇ KARTI */
+.result-card{width:100%;max-width:480px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:18px;display:none}
+.result-card.show{display:block}
+.rc-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-dim);color:var(--green);border:1px solid rgba(61,214,140,.28);font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:14px}
+.rc-team{font-size:26px;font-weight:900;margin-bottom:3px}
+.rc-date{font-size:12px;color:var(--text2);margin-bottom:10px}
+.rc-members{font-size:13px;color:var(--text);font-weight:600;margin-bottom:6px}
+.rc-promise{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:11px 14px;font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5}
+.rc-promise strong{color:var(--text);display:block;margin-bottom:3px;font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+.btns{display:flex;flex-direction:column;gap:9px}
+
+/* GEÇMİŞ */
+.history-card{width:100%;max-width:480px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-top:20px;overflow:hidden}
+.hc-hdr{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:flex;justify-content:space-between;align-items:center}
+.hc-hdr span{font-size:11px;color:var(--text3);font-weight:500;text-transform:none;letter-spacing:0;cursor:pointer}
+.hc-hdr span:hover{color:var(--red)}
+.hist-row{padding:11px 16px;border-bottom:1px solid rgba(38,48,64,.5);cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:12px}
+.hist-row:last-child{border-bottom:none}
+.hist-row:hover{background:var(--bg3)}
+.hist-icon{font-size:20px}
+.hist-name{font-size:14px;font-weight:700}
+.hist-meta{font-size:11px;color:var(--text3);margin-top:1px}
+.hist-empty{padding:22px;text-align:center;color:var(--text3);font-size:13px}
+
+/* OVERLAY PRINT */
+.print-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9000;flex-direction:column;gap:14px}
+.print-ov.show{display:flex}
+.print-ov canvas{border-radius:var(--rs);box-shadow:0 8px 40px rgba(0,0,0,.6);max-width:90vw;max-height:75vh;object-fit:contain}
+.print-ov-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pov-btn{padding:11px 22px;border:none;border-radius:var(--rs);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.pov-btn:hover{opacity:.85}
+
+/* PRINT MEDIA */
+@media print{
+  body > *:not(#print-area){display:none!important}
+  #print-area{display:block!important;position:fixed;inset:0}
+  #print-area canvas,#print-area img{width:100%;height:auto;page-break-after:avoid}
+}
+#print-area{display:none}
+</style>
+</head>
+<body>
+
+<h1>🛡️ Admin Paneli</h1>
+<p class="sub">Nezaket Sahibi Akranlar — Sertifika Doğrulama</p>
+
+<!-- SCANNER -->
+<div class="scanner-card">
+  <div class="sc-hdr">
+    <div class="sc-hdr-icon">📷</div>
+    <div>
+      <div class="sc-hdr-title">QR Kod Okuyucu</div>
+      <div class="sc-hdr-sub">Kamerayı QR koduna doğrultun</div>
+    </div>
+  </div>
+  <div class="sc-body">
+    <div id="reader"></div>
+    <div id="status" class="status st-idle">⬤ &nbsp;Kamera bekleniyor…</div>
+    <div class="gap"></div>
+    <button class="btn btn-blue" id="startBtn" onclick="startScan()">📷 &nbsp;Kamerayı Başlat</button>
+    <div class="gap"></div>
+    <button class="btn btn-ghost" id="stopBtn" onclick="stopScan()" disabled>⏹ &nbsp;Durdur</button>
+  </div>
+</div>
+
+<!-- SONUÇ -->
+<div class="result-card" id="resultCard">
+  <div class="rc-badge">✓ &nbsp;SERTİFİKA DOĞRULANDI</div>
+  <div class="rc-team" id="rc-team">—</div>
+  <div class="rc-date" id="rc-date">—</div>
+  <div class="rc-members" id="rc-members">—</div>
+  <div class="rc-promise"><strong>Nezaket Sözü</strong><span id="rc-promise">—</span></div>
+  <div class="btns">
+    <button class="btn btn-green" onclick="printCert()">🖨️ &nbsp;Sertifikayı Yazdır / PDF Aç</button>
+    <button class="btn btn-orange" onclick="downloadPDF()">⬇️ &nbsp;PDF İndir</button>
+    <button class="btn btn-ghost" onclick="resetScan()">🔄 &nbsp;Yeni QR Okut</button>
+  </div>
+</div>
+
+<!-- GEÇMİŞ -->
+<div class="history-card" id="historyCard">
+  <div class="hc-hdr">📋 Son Okutulanlar <span onclick="clearHistory()">Temizle</span></div>
+  <div id="historyList"><div class="hist-empty">Henüz QR okutulmadı</div></div>
+</div>
+
+<!-- YAZDIR OVERLAY -->
+<div class="print-ov" id="printOv">
+  <canvas id="previewCanvas"></canvas>
+  <div class="print-ov-btns">
+    <button class="pov-btn" style="background:var(--green);color:#061a0f" onclick="doPrint()">🖨️ Yazdır</button>
+    <button class="pov-btn" style="background:var(--blue);color:#fff" onclick="doDownload()">⬇️ PDF İndir</button>
+    <button class="pov-btn" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border2)" onclick="closeOverlay()">✕ Kapat</button>
+  </div>
+</div>
+<div id="print-area"></div>
+
+<script>
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let scanner = null;
+let scanning = false;
+let currentData = null;
+let history = JSON.parse(localStorage.getItem('nesak-admin-history')||'[]');
+
+// ═══════════════════════════════
+// SCANNER
+// ═══════════════════════════════
+function setStatus(msg, type='idle'){
+  const el = document.getElementById('status');
+  el.className = 'status st-'+type;
+  el.innerHTML = '⬤ &nbsp;'+msg;
+}
+
+async function startScan(){
+  if(scanning) return;
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('stopBtn').disabled = false;
+  setStatus('Kamera açılıyor…','scan');
+  try{
+    scanner = new Html5Qrcode('reader');
+    const cameras = await Html5Qrcode.getCameras();
+    if(!cameras||cameras.length===0) throw new Error('Kamera bulunamadı');
+    // Arka kamerayı tercih et
+    const cam = cameras.find(c=>c.label.toLowerCase().includes('back')||c.label.toLowerCase().includes('arka'))||cameras[cameras.length-1];
+    await scanner.start(
+      cam.id,
+      {fps:10, qrbox:{width:260,height:260}},
+      onScanSuccess,
+      ()=>{}
+    );
+    scanning = true;
+    setStatus('QR kod bekleniyor…','scan');
+  }catch(e){
+    setStatus('Hata: '+e.message,'err');
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+  }
+}
+
+async function stopScan(){
+  if(scanner && scanning){
+    await scanner.stop();
+    scanner.clear();
+    scanning = false;
+  }
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+  setStatus('Kamera durduruldu','idle');
+}
+
+function onScanSuccess(decoded){
+  // Önce durdur
+  stopScan();
+  // Veriyi parse et
+  try{
+    const data = JSON.parse(decoded);
+    if(data.type !== 'nesak-cert') throw new Error('Bu QR Nezaket Akranlar sertifikasına ait değil');
+    currentData = data;
+    showResult(data);
+    addToHistory(data);
+    setStatus('✓ QR başarıyla okundu!','ok');
+  }catch(e){
+    setStatus('Geçersiz QR: '+e.message,'err');
+    setTimeout(()=>startScan(),2000);
+  }
+}
+
+// ═══════════════════════════════
+// SONUÇ GÖSTER
+// ═══════════════════════════════
+function showResult(d){
+  document.getElementById('rc-team').textContent = d.team||'—';
+  document.getElementById('rc-date').textContent = d.date||'—';
+  document.getElementById('rc-members').textContent = (d.members||[]).join('  •  ');
+  document.getElementById('rc-promise').textContent = d.promise||'—';
+  document.getElementById('resultCard').classList.add('show');
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function resetScan(){
+  currentData = null;
+  document.getElementById('resultCard').classList.remove('show');
+  setStatus('Kamera bekleniyor…','idle');
+  document.getElementById('reader').innerHTML='';
+  document.getElementById('startBtn').disabled=false;
+  document.getElementById('stopBtn').disabled=true;
+}
+
+// ═══════════════════════════════
+// SERTİFİKA CANVAS ÇİZ
+// ═══════════════════════════════
+function drawCertCanvas(d){
+  const W=595, H=842;
+  const canvas=document.createElement('canvas');
+  canvas.width=W*2; canvas.height=H*2;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(2,2);
+
+  function fillRect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(x,y,w,h);}
+  function rect(x,y,w,h,color,lw=1){ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.strokeRect(x,y,w,h);}
+  function line(x1,y1,x2,y2,color='#BBBBBB',lw=0.5){ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+  function text(str,x,y,size,color,align,font){ctx.font=`${font||'700'} ${size}px Inter,Arial,sans-serif`;ctx.fillStyle=color;ctx.textAlign=align||'left';ctx.fillText(str,x,y);}
+  function wrapText(str,x,y,maxW,lineH,size,color,align,font){
+    ctx.font=`${font||'600'} ${size}px Inter,Arial,sans-serif`;
+    ctx.fillStyle=color;ctx.textAlign=align||'left';
+    const words=str.split(' ');let ln='';
+    for(let i=0;i<words.length;i++){const t=ln+(ln?' ':'')+words[i];if(ctx.measureText(t).width>maxW&&ln){ctx.fillText(ln,x,y);ln=words[i];y+=lineH;}else ln=t;}
+    if(ln) ctx.fillText(ln,x,y);
+  }
+
+  const dateStr=d.date||new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+  const members=(d.members||[]);
+
+  fillRect(0,0,W,H,'#FFFFFF');
+  fillRect(0,0,W,8,'#1A1A1A');
+  fillRect(0,8,W,3,'#555555');
+
+  text('★',W/2,55,40,'#1A1A1A','center','900');
+  text('NEZAKET ELCİLERİ',W/2,75,10,'#555555','center','700');
+  text('Başarı Sertifikası',W/2,105,28,'#1A1A1A','center','900');
+  text('Dijital Oryantiring Tamamlandı ✓',W/2,125,11,'#666666','center','500');
+  line(40,140,W-40,140,'#CCCCCC',1);
+
+  text('EKİP ADI',W/2,165,9,'#888888','center','700');
+  text(d.team||'—',W/2,198,30,'#1A1A1A','center','900');
+  const memStr=members.join('  •  ');
+  text(memStr,W/2,220,11,'#333333','center','600');
+  line(40,256,W-40,256,'#CCCCCC',1);
+
+  fillRect(40,268,W-80,88,'#F5F5F5');
+  fillRect(40,268,3,88,'#1A1A1A');
+  rect(40,268,W-80,88,'#CCCCCC',0.8);
+  text('NEZAKET SÖZÜMÜZ',52,286,9,'#333333','left','700');
+  wrapText('"'+(d.promise||'—')+'"',52,306,W-105,18,12,'#1A1A1A','left','600');
+
+  line(40,372,W-40,372,'#CCCCCC',1);
+  text(dateStr,W/2,393,11,'#888888','center','500');
+
+  const icons=['📸','🔮','🎯','🔐','⚖️','🏆'];
+  const labels=['Empati','Bilmece','Kelime','Şifre','Kriz','Söz'];
+  const iconSpacing=(W-80)/6;
+  ctx.font='16px Inter,Arial,sans-serif'; ctx.textAlign='center';
+  for(let i=0;i<6;i++) ctx.fillText(icons[i],40+iconSpacing*i+iconSpacing/2,435);
+  for(let i=0;i<6;i++) text(labels[i],40+iconSpacing*i+iconSpacing/2,450,7,'#AAAAAA','center','600');
+
+  fillRect(W/2-60,460,120,26,'#F0FFF6'); rect(W/2-60,460,120,26,'#3DD68C',1);
+  text('6/6 İSTASYON TAMAMLANDI ✓',W/2,477,8,'#2A8A5A','center','800');
+
+  line(40,494,W-40,494,'#CCCCCC',1);
+  text('Nezaket Sahibi Akranlar',W/2,H-18,11,'#888888','center','600');
+  fillRect(0,H-8,W,8,'#1A1A1A');
+
+  return canvas;
+}
+
+// ═══════════════════════════════
+// YAZDIR / İNDİR
+// ═══════════════════════════════
+function printCert(){
+  if(!currentData) return;
+  const canvas = drawCertCanvas(currentData);
+  // Overlay'de göster
+  const prev = document.getElementById('previewCanvas');
+  prev.width = canvas.width; prev.height = canvas.height;
+  prev.getContext('2d').drawImage(canvas,0,0);
+  // Ekrana sığdır
+  const maxW = Math.min(window.innerWidth*0.88, 600);
+  const maxH = window.innerHeight*0.72;
+  const scale = Math.min(maxW/canvas.width, maxH/canvas.height);
+  prev.style.width  = (canvas.width*scale)+'px';
+  prev.style.height = (canvas.height*scale)+'px';
+  document.getElementById('printOv').classList.add('show');
+  // print-area'ya koy
+  const pa = document.getElementById('print-area');
+  pa.innerHTML='';
+  const img=document.createElement('img');
+  img.src=canvas.toDataURL('image/png');
+  img.style.width='100%';
+  pa.appendChild(img);
+}
+
+function doPrint(){
+  window.print();
+}
+
+async function doDownload(){
+  if(!currentData) return;
+  if(!window.jspdf){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+      s.onload=res; s.onerror=()=>{
+        const s2=document.createElement('script');
+        s2.src='https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
+        s2.onload=res; s2.onerror=rej;
+        document.head.appendChild(s2);
+      };
+      document.head.appendChild(s);
+    });
+  }
+  const {jsPDF}=window.jspdf;
+  const canvas=drawCertCanvas(currentData);
+  const imgData=canvas.toDataURL('image/jpeg',0.92);
+  const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'a4'});
+  doc.addImage(imgData,'JPEG',0,0,595,842);
+  const fn=(currentData.team||'sertifika').replace(/\s+/g,'').toLowerCase()+'_nesak.pdf';
+  doc.save(fn);
+}
+
+function downloadPDF(){ doDownload(); }
+
+function closeOverlay(){
+  document.getElementById('printOv').classList.remove('show');
+}
+
+// ═══════════════════════════════
+// GEÇMİŞ
+// ═══════════════════════════════
+function addToHistory(d){
+  history.unshift({team:d.team, date:d.date, members:d.members, promise:d.promise, score:d.score, scannedAt:new Date().toLocaleTimeString('tr-TR')});
+  if(history.length>20) history.pop();
+  localStorage.setItem('nesak-admin-history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory(){
+  const el=document.getElementById('historyList');
+  if(!history.length){el.innerHTML='<div class="hist-empty">Henüz QR okutulmadı</div>';return;}
+  el.innerHTML=history.map((h,i)=>`
+    <div class="hist-row" onclick="loadFromHistory(${i})">
+      <div class="hist-icon">🏆</div>
+      <div>
+        <div class="hist-name">${h.team}</div>
+        <div class="hist-meta">${(h.members||[]).join(' • ')} &nbsp;·&nbsp; ${h.scannedAt}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadFromHistory(i){
+  currentData = history[i];
+  showResult(currentData);
+  setStatus('Geçmişten yüklendi: '+currentData.team,'ok');
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function clearHistory(){
+  if(!confirm('Tüm geçmiş silinsin mi?')) return;
+  history=[];
+  localStorage.removeItem('nesak-admin-history');
+  renderHistory();
+}
+
+// Overlay dışına tıklayınca kapat
+document.getElementById('printOv').addEventListener('click',function(e){if(e.target===this)closeOverlay();});
+
+// Init
+renderHistory();
+</script>
+</body>
+</html>
