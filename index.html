@@ -21,6 +21,17 @@
   --r:16px;--rs:10px;
   --font:'Inter',sans-serif;
 }
+[data-theme="light"]{
+  --bg:#F0F4FA;--bg2:#FFFFFF;--bg3:#E8EDF5;--bg4:#DDE4EF;
+  --border:#CBD5E8;--border2:#A0AECF;
+  --blue-dim:#DBEAFE;--green-dim:#DCFCE7;--orange-dim:#FEF3C7;
+  --red-dim:#FEE2E2;--purple-dim:#EDE9FE;--teal-dim:#CCFBF1;
+  --text:#1A2035;--text2:#4A5875;--text3:#8A9AB8;
+}
+
+/* TEMA BUTONU */
+.theme-btn{position:fixed;top:12px;right:12px;z-index:9999;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:5px 11px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:all .2s}
+.theme-btn:hover{color:var(--text);border-color:var(--blue)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
@@ -253,6 +264,7 @@ textarea{resize:vertical;min-height:84px}
 </style>
 </head>
 <body>
+<button class="theme-btn" id="theme-btn" onclick="cycleTheme()">🌙 Karanlık</button>
 
 <!-- ═══════════════════════════════════════
      ONBOARDING
@@ -554,15 +566,14 @@ textarea{resize:vertical;min-height:84px}
       </div>
       <div class="cert-div"></div>
       <div class="cert-date" id="cert-date">—</div>
-      <div class="cert-school">Gazi Sosyal Bilimler Lisesi</div>
+      <div class="cert-school">Nezaket Sahibi Akranlar</div>
     </div>
     <div class="sum-card">
       <div class="sum-hdr">📋 Ekip Özeti</div>
       <div id="sum-items"></div>
     </div>
     <div id="pdf-spin" class="pdf-spin"><div class="spin-ring"></div> PDF oluşturuluyor…</div>
-    <button class="btn btn-purple" onclick="downloadPDF()" style="margin-bottom:9px">⬇️ PDF Sertifika İndir</button>
-    <button class="btn btn-ghost" onclick="location.reload()" style="margin-bottom:30px">🔄 Yeni Oyun Başlat</button>
+    <button class="btn btn-purple" onclick="downloadPDF()" style="margin-bottom:30px;font-size:17px;padding:16px">⬇️ PDF Sertifika İndir</button>
   </div>
 </div>
 
@@ -577,6 +588,30 @@ textarea{resize:vertical;min-height:84px}
 </div>
 
 <script>
+// ═══════════════════════════════
+// TEMA YÖNETİMİ
+// ═══════════════════════════════
+(function(){
+  const btn=document.getElementById('theme-btn');
+  const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  // Başlangıç: sistem teması
+  let mode = prefersDark ? 'dark' : 'light';
+  applyTheme(mode);
+  function applyTheme(m){
+    if(m==='light'){
+      document.documentElement.setAttribute('data-theme','light');
+      btn.textContent='☀️ Açık';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      btn.textContent='🌙 Karanlık';
+    }
+  }
+  window.cycleTheme=function(){
+    mode = (mode==='dark') ? 'light' : 'dark';
+    applyTheme(mode);
+  };
+})();
+
 // ═══════════════════════════════
 // STATE – memory only, no storage
 // ═══════════════════════════════
@@ -991,10 +1026,19 @@ async function downloadPDF(){
       if(line) ctx.fillText(line,x,y);
       return y;
     }
-    // base64 img çizici
-    function drawImg(src,x,y,w,h){
+    // Fotoğraflar — orijinal en/boy oranı korunarak çiz
+    function drawImgFit(src,x,y,maxW,maxH){
       return new Promise(res=>{
-        const img=new Image(); img.onload=()=>{ ctx.drawImage(img,x,y,w,h); res(); }; img.onerror=res;
+        const img=new Image();
+        img.onload=()=>{
+          const ratio=img.naturalWidth/img.naturalHeight;
+          let dw=maxW, dh=maxW/ratio;
+          if(dh>maxH){ dh=maxH; dw=maxH*ratio; }
+          const ox=x+(maxW-dw)/2;
+          ctx.drawImage(img,ox,y,dw,dh);
+          res(dh);
+        };
+        img.onerror=()=>res(maxH);
         img.src=src;
       });
     }
@@ -1030,7 +1074,7 @@ async function downloadPDF(){
     fillRect(40,p1y+268,W-80,88,'#F5F5F5');
     fillRect(40,p1y+268,3,88,'#1A1A1A');
     rect(40,p1y+268,W-80,88,'#CCCCCC',0.8);
-    text('NEZAKETSÖZİMİZ',52,p1y+286,9,'#333333','left','700');
+    text('NEZAKET SÖZÜMÜZ',52,p1y+286,9,'#333333','left','700');
     const promise=G.data.promise||'—';
     wrapText('"'+promise+'"',52,p1y+306,W-105,18,12,'#1A1A1A','left','600');
 
@@ -1039,20 +1083,23 @@ async function downloadPDF(){
     // Tarih & okul
     text(dateStr,W/2,p1y+393,11,'#888888','center','500');
 
-    // Onay imza kutuları
-    const bw=(W-100)/2;
-    fillRect(40,p1y+415,bw,55,'#F9F9F9'); rect(40,p1y+415,bw,55,'#CCCCCC',0.8);
-    text('Danışman Öğretmen',40+bw/2,p1y+433,9,'#888888','center','600');
-    line(55,p1y+455,40+bw-15,p1y+455,'#AAAAAA',0.8);
-    text('İmza / Kaşe',40+bw/2,p1y+466,8,'#AAAAAA','center','400');
+    // Dekoratif rozet alanı — istasyon ikonları
+    const icons=['📸','🔮','🎯','🔐','⚖️','🏆'];
+    const iconSpacing=(W-80)/6;
+    ctx.font='16px Inter,Arial,sans-serif'; ctx.textAlign='center';
+    for(let i=0;i<6;i++){
+      ctx.fillText(icons[i], 40+iconSpacing*i+iconSpacing/2, p1y+435);
+    }
+    const labels=['Empati','Bilmece','Kelime','Şifre','Kriz','Söz'];
+    for(let i=0;i<6;i++){
+      text(labels[i],40+iconSpacing*i+iconSpacing/2,p1y+450,7,'#AAAAAA','center','600');
+    }
+    // Tamamlandı damgası
+    fillRect(W/2-60,p1y+460,120,26,'#F0FFF6'); rect(W/2-60,p1y+460,120,26,'#3DD68C',1);
+    text('6/6 İSTASYON TAMAMLANDI ✓',W/2,p1y+477,8,'#2A8A5A','center','800');
 
-    fillRect(W-40-bw,p1y+415,bw,55,'#F9F9F9'); rect(W-40-bw,p1y+415,bw,55,'#CCCCCC',0.8);
-    text('Okul Müdürü',W-40-bw/2,p1y+433,9,'#888888','center','600');
-    line(W-40-bw+15,p1y+455,W-55,p1y+455,'#AAAAAA',0.8);
-    text('İmza / Kaşe',W-40-bw/2,p1y+466,8,'#AAAAAA','center','400');
-
-    line(40,p1y+485,W-40,p1y+485,'#CCCCCC',1);
-    text('Gazi Sosyal Bilimler Lisesi',W/2,p1y+H-18,11,'#888888','center','600');
+    line(40,p1y+494,W-40,p1y+494,'#CCCCCC',1);
+    text('Nezaket Sahibi Akranlar',W/2,p1y+H-18,11,'#888888','center','600');
 
     // Alt bant
     fillRect(0,p1y+H-8,W,8,'#1A1A1A');
@@ -1105,19 +1152,21 @@ async function downloadPDF(){
       text('Fotoğraf yüklenmedi',W/2,sy+30,11,'#AAAAAA','center','500');
       sy+=58;
     } else {
-      // Fotoğraflar yan yana (max 2)
-      const cols=photos.length; const imgW=(W-80-(cols-1)*10)/cols; const imgH=Math.min(imgW*0.65,100);
+      // Fotoğraflar yan yana (max 2) — orijinal oran korunur
+      const cols=photos.length; const imgW=(W-80-(cols-1)*10)/cols; const maxImgH=160;
+      let usedH=0;
       for(let i=0;i<photos.length;i++){
         const ix=40+i*(imgW+10);
-        await drawImg(photos[i].src,ix,sy,imgW,imgH);
-        rect(ix,sy,imgW,imgH,'#CCCCCC',0.6);
-        text(photos[i].label,ix,sy+imgH+11,8,'#666666','left','600');
+        const drawnH=await drawImgFit(photos[i].src,ix,sy,imgW,maxImgH);
+        rect(ix,sy,imgW,drawnH,'#CCCCCC',0.6);
+        text(photos[i].label,ix,sy+drawnH+11,8,'#666666','left','600');
+        if(drawnH>usedH) usedH=drawnH;
       }
-      sy+=imgH+22;
+      sy+=usedH+22;
     }
 
     line(40,sy+4,W-40,sy+4,'#CCCCCC',1);
-    text('Gazi Sosyal Bilimler Lisesi',W/2,p2y+H-18,11,'#888888','center','600');
+    text('Nezaket Sahibi Akranlar',W/2,p2y+H-18,11,'#888888','center','600');
     text(dateStr,40,p2y+H-18,11,'#888888','left','500');
     fillRect(0,p2y+H-8,W,8,'#1A1A1A');
 
@@ -1150,7 +1199,7 @@ async function downloadPDF(){
     c2.getContext('2d').drawImage(canvas,0,H*2,W*2,H*2,0,0,W*2,H*2);
     doc.addImage(c2.toDataURL('image/jpeg',0.92),'JPEG',0,0,W,H);
 
-    doc.save(`Nezaket_Sertifikasi_${G.teamName.replace(/\s+/g,'_')}.pdf`);
+    doc.save(`${G.teamName.replace(/\s+/g,'').toLowerCase()}nesak.pdf`);
 
   }catch(err){
     console.error(err);
