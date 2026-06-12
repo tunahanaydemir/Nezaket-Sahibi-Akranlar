@@ -496,8 +496,17 @@ textarea{resize:vertical;min-height:84px}
 <!-- CERTIFICATE SCREEN -->
 <div id="scr-cert" class="scr">
   <div class="cert-wrap">
+    <div class="sum-card" id="qr-cert-card">
+      <div class="sum-hdr">🔖 QR Sertifika</div>
+      <div style="padding:18px;display:flex;flex-direction:column;align-items:center;gap:4px">
+        <div id="qr-cert-wrap" style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border-radius:12px;overflow:hidden">
+          <div id="qr-cert-loading" style="font-size:12px;color:var(--text2);text-align:center;padding:10px">QR oluşturuluyor…</div>
+          <img id="qr-cert-img" style="display:none;width:100%;height:100%;object-fit:contain" alt="Sertifika QR">
+        </div>
+      </div>
+    </div>
     <div id="pdf-spin" class="pdf-spin"><div class="spin-ring"></div> PDF oluşturuluyor…</div>
-    <button class="btn btn-purple" onclick="downloadPDF()" style="margin-bottom:14px;font-size:17px;padding:16px">⬇️ PDF Sertifika İndir</button>
+    <button class="btn btn-purple" onclick="downloadPDF()" style="margin-bottom:14px;font-size:17px;padding:16px">⬇️ Sertifikayı İndir</button>
     <div id="cert-card" class="cert-card">
       <div class="cert-glow"></div>
       <div class="cert-rainbow"></div>
@@ -866,7 +875,38 @@ function finishGame(){completeStation(6);}
 // ═══════════════════════════════
 // CERTIFICATE RENDER (ekran)
 // ═══════════════════════════════
+function buildQRPayload(){
+  const dateStr=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+  return JSON.stringify({
+    type:'nesak-cert',
+    version:'v4',
+    team:G.teamName,
+    members:G.members,
+    mascot:G.mascotName||'',
+    mascotIcon:G.mascotIcon||'',
+    promise:G.data.promise||'',
+    riddle:G.data.riddle||'',
+    cipher:G.data.cipher||'',
+    scenario:G.data.scenario||'',
+    score:G.done.length,
+    date:dateStr,
+    certText:`${dateStr} tarihinde düzenlenen NESAK Oryantiring Etkinliği'ne başarıyla katılım sağlayan ${G.teamName} ekibine teşekkür ederiz.`
+  });
+}
+function generateCertQR(){
+  const img=document.getElementById('qr-cert-img');
+  const loading=document.getElementById('qr-cert-loading');
+  if(!img)return;
+  img.style.display='none';
+  loading.style.display='flex';loading.textContent='QR oluşturuluyor…';
+  const url='https://api.qrserver.com/v1/create-qr-code/?size=500x500&data='+encodeURIComponent(buildQRPayload());
+  img.onload=()=>{loading.style.display='none';img.style.display='block';};
+  img.onerror=()=>{loading.textContent='QR oluşturulamadı';};
+  img.src=url;
+}
+
 function renderCert(){
+  generateCertQR();
   document.getElementById('cert-team-nm').textContent=G.teamName;
   document.getElementById('cert-mascot-ic').textContent=G.mascotIcon;
   document.getElementById('cert-mascot-nm').textContent=G.mascotName;
@@ -1130,28 +1170,7 @@ async function downloadPDF(){
     // SAYFA 3 — QR KOD SAYFASI
     // QR içeriği: sadece sayfa 1 (sertifika+özet) nin JSON verisi
     // ════════════════════════════════════════════════════════════
-    const qrPayload=JSON.stringify({
-  type:'nesak-cert',
-  version:'v4',
-
-  team:G.teamName,
-  members:G.members,
-
-  mascot:G.mascotName||'',
-  mascotIcon:G.mascotIcon||'',
-
-  promise:G.data.promise||'',
-
-  riddle:G.data.riddle||'',
-  cipher:G.data.cipher||'',
-  scenario:G.data.scenario||'',
-
-  score:G.done.length,
-  date:dateStr,
-
-  certText:
-    `${dateStr} tarihinde düzenlenen NESAK Oryantiring Etkinliği'ne başarıyla katılım sağlayan ${G.teamName} ekibine teşekkür ederiz.`
-});
+    const qrPayload=buildQRPayload();
 
     // QR görüntüsünü API'den çek
     async function makeQRImg(text){
