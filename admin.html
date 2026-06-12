@@ -478,37 +478,33 @@ function drawCertCanvas(d){
     py += 45;
   }
 
-  // İmza bölümü
+  // İmza bölümü (çakışma fix)
 
+let sigY = H - 120;
+
+// çizgi
 ctx.beginPath();
-ctx.moveTo(W/2-110,H-135);
-ctx.lineTo(W/2+110,H-135);
+ctx.moveTo(W/2 - 110, sigY);
+ctx.lineTo(W/2 + 110, sigY);
 ctx.stroke();
 
+sigY += 28;
+
+// kurum
 ctx.font = "bold 16px Georgia";
+ctx.fillText("Gazi Sosyal Bilimler Lisesi", W/2, sigY);
 
-ctx.fillText(
-  "Gazi Sosyal Bilimler Lisesi",
-  W/2,
-  H-108
-);
+sigY += 22;
 
+// kurul
 ctx.font = "15px Georgia";
+ctx.fillText("Bilim Kurulu", W/2, sigY);
 
-ctx.fillText(
-  "Bilim Kurulu",
-  W/2,
-  H-86
-);
+sigY += 22;
 
+// alt yazı
 ctx.font = "12px Georgia";
-
-ctx.fillText(
-  "Doğrulanmış Sertifika",
-  W/2,
-  H-50
-);
-
+ctx.fillText("Doğrulanmış Sertifika", W/2, sigY);
   return canvas;
 }
 
