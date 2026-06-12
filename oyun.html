@@ -1131,15 +1131,27 @@ async function downloadPDF(){
     // QR içeriği: sadece sayfa 1 (sertifika+özet) nin JSON verisi
     // ════════════════════════════════════════════════════════════
     const qrPayload=JSON.stringify({
-      type:'nesak-cert',
-      team:G.teamName,
-      members:G.members,
-      mascot:G.mascotName||'',
-      mascotIcon:G.mascotIcon||'',
-      promise:G.data.promise||'',
-      score:G.done.length,
-      date:dateStr
-    });
+  type:'nesak-cert',
+  version:'v4',
+
+  team:G.teamName,
+  members:G.members,
+
+  mascot:G.mascotName||'',
+  mascotIcon:G.mascotIcon||'',
+
+  promise:G.data.promise||'',
+
+  riddle:G.data.riddle||'',
+  cipher:G.data.cipher||'',
+  scenario:G.data.scenario||'',
+
+  score:G.done.length,
+  date:dateStr,
+
+  certText:
+    `${dateStr} tarihinde düzenlenen NESAK Oryantiring Etkinliği'ne başarıyla katılım sağlayan ${G.teamName} ekibine teşekkür ederiz.`
+});
 
     // QR görüntüsünü API'den çek
     async function makeQRImg(text){
