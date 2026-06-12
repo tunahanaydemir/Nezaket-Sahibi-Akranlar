@@ -478,37 +478,36 @@ function drawCertCanvas(d){
     py += 45;
   }
 
-  if(d.score){
+  // İmza bölümü
 
-    ctx.font = "700 16px Georgia";
+ctx.beginPath();
+ctx.moveTo(W/2-110,H-135);
+ctx.lineTo(W/2+110,H-135);
+ctx.stroke();
 
-    ctx.fillText(
-      `Tamamlanan İstasyon Sayısı: ${d.score}/6`,
-      W/2,
-      py
-    );
-  }
+ctx.font = "bold 16px Georgia";
 
-  ctx.font = "15px Georgia";
+ctx.fillText(
+  "Gazi Sosyal Bilimler Lisesi",
+  W/2,
+  H-108
+);
 
-  ctx.fillText(
-    "Nezaket Sahibi Akranlar Koordinasyon Ekibi",
-    W/2,
-    H-95
-  );
+ctx.font = "15px Georgia";
 
-  ctx.beginPath();
-  ctx.moveTo(W/2-90,H-125);
-  ctx.lineTo(W/2+90,H-125);
-  ctx.stroke();
+ctx.fillText(
+  "Bilim Kurulu",
+  W/2,
+  H-86
+);
 
-  ctx.font = "12px Georgia";
+ctx.font = "12px Georgia";
 
-  ctx.fillText(
-    "Dijital Doğrulanmış Sertifika",
-    W/2,
-    H-55
-  );
+ctx.fillText(
+  "Doğrulanmış Sertifika",
+  W/2,
+  H-50
+);
 
   return canvas;
 }
