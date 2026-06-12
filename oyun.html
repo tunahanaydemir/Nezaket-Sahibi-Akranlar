@@ -499,7 +499,7 @@ textarea{resize:vertical;min-height:84px}
     <div class="sum-card" id="qr-cert-card">
       <div class="sum-hdr">🔖 QR Sertifika</div>
       <div style="padding:18px;display:flex;flex-direction:column;align-items:center;gap:4px">
-        <div id="qr-cert-wrap" style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border-radius:12px;overflow:hidden">
+        <div id="qr-cert-wrap" style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;background:#FFFFFF;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;padding:14px;box-sizing:border-box">
           <div id="qr-cert-loading" style="font-size:12px;color:var(--text2);text-align:center;padding:10px">QR oluşturuluyor…</div>
           <img id="qr-cert-img" style="display:none;width:100%;height:100%;object-fit:contain" alt="Sertifika QR">
         </div>
@@ -532,10 +532,6 @@ textarea{resize:vertical;min-height:84px}
       <div class="cert-div"></div>
       <div class="cert-date" id="cert-date">—</div>
       <div class="cert-school">Nezaket Sahibi Akranlar</div>
-    </div>
-    <div class="sum-card">
-      <div class="sum-hdr">📋 Ekip Özeti</div>
-      <div id="sum-items"></div>
     </div>
   </div>
 </div>
@@ -915,19 +911,6 @@ function renderCert(){
   G.members.forEach(m=>{const t=document.createElement('div');t.className='cert-mem';t.textContent=m;mEl.appendChild(t);});
   const now=new Date();
   document.getElementById('cert-date').textContent=now.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
-  const si=document.getElementById('sum-items');si.innerHTML='';
-  const rows=[
-    {ic:'📸',lb:'1. İstasyon – Fotoğraf',vl:G.data.photo1?'✓ Fotoğraf yüklendi':'—'},
-    {ic:'🔮',lb:'2. İstasyon – Bilmece Cevabı',vl:G.data.riddle||'—'},
-    {ic:'🎯',lb:'3. İstasyon – Kelime Oyunu',vl:G.done.includes(3)?'✓ Tamamlandı':'—'},
-    {ic:'🔐',lb:'4. İstasyon – Şifre',vl:G.data.cipher||'—'},
-    {ic:'⚖️',lb:'5. İstasyon – Senaryo',vl:G.data.scenario?G.data.scenario+' şıkkı seçildi':'—'},
-    {ic:'🏆',lb:'6. İstasyon – Nezaket Sözü',vl:G.data.promise||'—'},
-  ];
-  rows.forEach(r=>{const d=document.createElement('div');d.className='sum-item';
-    d.innerHTML=`<div class="sum-ic">${r.ic}</div><div><div class="sum-lbl">${r.lb}</div><div class="sum-val">${r.vl}</div></div>`;
-    si.appendChild(d);
-  });
 }
 
 // ═══════════════════════════════════════════════════════════════
