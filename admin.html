@@ -318,65 +318,197 @@ function showResult(d){
 // SERTİFİKA CANVAS ÇİZİM MOTORU
 // ═══════════════════════════════
 function drawCertCanvas(d){
-  const W=595, H=842;
-  const canvas=document.createElement('canvas');
-  canvas.width=W*2; canvas.height=H*2;
-  const ctx=canvas.getContext('2d');
+
+  const W = 595;
+  const H = 842;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W * 2;
+  canvas.height = H * 2;
+
+  const ctx = canvas.getContext("2d");
   ctx.scale(2,2);
 
-  function fillRect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(x,y,w,h);}
-  function rect(x,y,w,h,color,lw=1){ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.strokeRect(x,y,w,h);}
-  function line(x1,y1,x2,y2,color='#BBBBBB',lw=0.5){ctx.strokeStyle=color;ctx.lineWidth=lw;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
-  function text(str,x,y,size,color,align,font){ctx.font=`${font||'700'} ${size}px Inter,Arial,sans-serif`;ctx.fillStyle=color;ctx.textAlign=align||'left';ctx.fillText(str,x,y);}
-  function wrapText(str,x,y,maxW,lineH,size,color,align,font){
-    ctx.font=`${font||'600'} ${size}px Inter,Arial,sans-serif`;
-    ctx.fillStyle=color;ctx.textAlign=align||'left';
-    const words=str.split(' ');let ln='';
-    for(let i=0;i<words.length;i++){const t=ln+(ln?' ':'')+words[i];if(ctx.measureText(t).width>maxW&&ln){ctx.fillText(ln,x,y);ln=words[i];y+=lineH;}else ln=t;}
-    if(ln) ctx.fillText(ln,x,y);
+  const members = d.members || [];
+
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0,0,W,H);
+
+  ctx.strokeStyle = "#111";
+  ctx.lineWidth = 4;
+  ctx.strokeRect(20,20,W-40,H-40);
+
+  ctx.lineWidth = 1;
+  ctx.strokeRect(30,30,W-60,H-60);
+
+  ctx.fillStyle = "#000";
+  ctx.textAlign = "center";
+
+  ctx.font = "700 18px Georgia";
+  ctx.fillText("NEZAKET SAHİBİ AKRANLAR",W/2,70);
+
+  ctx.font = "900 34px Georgia";
+  ctx.fillText("BAŞARI SERTİFİKASI",W/2,120);
+
+  ctx.font = "16px Georgia";
+  ctx.fillText(
+    `${d.date || ""} tarihinde düzenlenen`,
+    W/2,
+    185
+  );
+
+  ctx.fillText(
+    "NESAK Oryantiring Etkinliği'ne",
+    W/2,
+    215
+  );
+
+  ctx.fillText(
+    "başarıyla katılım sağlayan",
+    W/2,
+    245
+  );
+
+  ctx.font = "900 32px Georgia";
+  ctx.fillText(
+    d.team || "Ekip",
+    W/2,
+    310
+  );
+
+  ctx.font = "16px Georgia";
+  ctx.fillText(
+    "ekibine teşekkür ederiz.",
+    W/2,
+    345
+  );
+
+  ctx.beginPath();
+  ctx.moveTo(90,375);
+  ctx.lineTo(W-90,375);
+  ctx.stroke();
+
+  ctx.font = "700 20px Georgia";
+  ctx.fillText(
+    "EKİP ÜYELERİ",
+    W/2,
+    420
+  );
+
+  ctx.font = "16px Georgia";
+
+  let y = 455;
+
+  members.forEach(member=>{
+    ctx.fillText("• " + member,W/2,y);
+    y += 28;
+  });
+
+  y += 20;
+
+  ctx.beginPath();
+  ctx.moveTo(120,y);
+  ctx.lineTo(W-120,y);
+  ctx.stroke();
+
+  y += 40;
+
+  ctx.font = "700 18px Georgia";
+  ctx.fillText(
+    "NEZAKET SÖZÜ",
+    W/2,
+    y
+  );
+
+  y += 35;
+
+  ctx.font = "italic 16px Georgia";
+
+  const promise =
+    d.promise ||
+    "Nezaket sözü belirtilmemiş.";
+
+  const maxWidth = 420;
+  const words = promise.split(" ");
+
+  let line = "";
+  let py = y;
+
+  for(let n=0;n<words.length;n++){
+
+    const testLine =
+      line + words[n] + " ";
+
+    const metrics =
+      ctx.measureText(testLine);
+
+    if(metrics.width > maxWidth && n > 0){
+      ctx.fillText(line,W/2,py);
+      line = words[n] + " ";
+      py += 24;
+    }else{
+      line = testLine;
+    }
   }
 
-  const dateStr=d.date||new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
-  const members=(d.members||[]);
+  ctx.fillText(line,W/2,py);
 
-  fillRect(0,0,W,H,'#FFFFFF');
-  fillRect(0,0,W,8,'#1A1A1A');
-  fillRect(0,8,W,3,'#555555');
+  py += 70;
 
-  text('★',W/2,55,40,'#1A1A1A','center','900');
-  text('NEZAKET ELCİLERİ',W/2,75,10,'#555555','center','700');
-  text('Başarı Sertifikası',W/2,105,28,'#1A1A1A','center','900');
-  text('Dijital Oryantiring Tamamlandı ✓',W/2,125,11,'#666666','center','500');
-  line(40,140,W-40,140,'#CCCCCC',1);
+  if(d.mascot){
 
-  text('EKİP ADI',W/2,165,9,'#888888','center','700');
-  text(d.team||'—',W/2,198,30,'#1A1A1A','center','900');
-  const memStr=members.join('  •  ');
-  text(memStr,W/2,220,11,'#333333','center','600');
-  line(40,256,W-40,256,'#CCCCCC',1);
+    ctx.font = "700 18px Georgia";
 
-  fillRect(40,268,W-80,88,'#F5F5F5');
-  fillRect(40,268,3,88,'#1A1A1A');
-  rect(40,268,W-80,88,'#CCCCCC',0.8);
-  text('NEZAKET SÖZÜMÜZ',52,286,9,'#333333','left','700');
-  wrapText('"'+(d.promise||'—')+'"',52,306,W-105,18,12,'#1A1A1A','left','600');
+    ctx.fillText(
+      "EKİP MASKOTU",
+      W/2,
+      py
+    );
 
-  line(40,372,W-40,372,'#CCCCCC',1);
-  text(dateStr,W/2,393,11,'#888888','center','500');
+    py += 35;
 
-  const icons=['📸','🔮','🎯','🔐','⚖️','🏆'];
-  const labels=['Empati','Bilmece','Kelime','Şifre','Kriz','Söz'];
-  const iconSpacing=(W-80)/6;
-  ctx.font='16px Inter,Arial,sans-serif'; ctx.textAlign='center';
-  for(let i=0;i<6;i++) ctx.fillText(icons[i],40+iconSpacing*i+iconSpacing/2,435);
-  for(let i=0;i<6;i++) text(labels[i],40+iconSpacing*i+iconSpacing/2,450,7,'#AAAAAA','center','600');
+    ctx.font = "16px Georgia";
 
-  fillRect(W/2-60,460,120,26,'#F0FFF6'); rect(W/2-60,460,120,26,'#3DD68C',1);
-  text('6/6 İSTASYON TAMAMLANDI ✓',W/2,477,8,'#2A8A5A','center','800');
+    ctx.fillText(
+      `${d.mascotIcon || ""} ${d.mascot}`,
+      W/2,
+      py
+    );
 
-  line(40,494,W-40,494,'#CCCCCC',1);
-  text('Nezaket Sahibi Akranlar',W/2,H-18,11,'#888888','center','600');
-  fillRect(0,H-8,W,8,'#1A1A1A');
+    py += 45;
+  }
+
+  if(d.score){
+
+    ctx.font = "700 16px Georgia";
+
+    ctx.fillText(
+      `Tamamlanan İstasyon Sayısı: ${d.score}/6`,
+      W/2,
+      py
+    );
+  }
+
+  ctx.font = "15px Georgia";
+
+  ctx.fillText(
+    "Nezaket Sahibi Akranlar Koordinasyon Ekibi",
+    W/2,
+    H-95
+  );
+
+  ctx.beginPath();
+  ctx.moveTo(W/2-90,H-125);
+  ctx.lineTo(W/2+90,H-125);
+  ctx.stroke();
+
+  ctx.font = "12px Georgia";
+
+  ctx.fillText(
+    "Dijital Doğrulanmış Sertifika",
+    W/2,
+    H-55
+  );
 
   return canvas;
 }
