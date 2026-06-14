@@ -18,6 +18,64 @@
             font-family: sans-serif;
         }
         
+        /* ----------------------------------------------- */
+        /* HİBRİT TV LOGO ANİMASYONU (GLINT + SUBTLE FLIP)  */
+        /* ----------------------------------------------- */
+        .fixed-logo-container {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            width: 120px;
+            height: auto;
+            z-index: 9999;
+            pointer-events: none;
+            overflow: hidden; /* Parlama dışarı taşmasın diye */
+            perspective: 1000px; /* 3D Dönüşün derinliği için */
+        }
+
+        .fixed-logo-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            /* 60 Saniyelik Ana Döngü: 3D Dönüşü Kontrol Eder */
+            animation: logoFlip 60s infinite ease-in-out;
+            transform-style: preserve-3d;
+        }
+
+        /* Parlama Efekti İçin Katman */
+        .fixed-logo-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                to right, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.5) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-25deg);
+            z-index: 10;
+            /* 60 Saniyelik Ana Döngü: Parlamayı Kontrol Eder */
+            animation: logoGlint 60s infinite ease-in-out;
+        }
+
+        /* 1. SEÇENEK: 30. saniyeye doğru tetiklenen PARLAMA (GLINT) */
+        @keyframes logoGlint {
+            0%, 46% { left: -150%; } 
+            49% { left: 150%; }     /* Tam 30. saniyeye gelirken (60 saniyenin %49'u) parlama geçer */
+            50%, 100% { left: -150%; }
+        }
+
+        /* 2. SEÇENEK: 60. saniyeye doğru tetiklenen 3D DÖNÜŞ (FLIP) */
+        @keyframes logoFlip {
+            0%, 96% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); } /* Tam 60. saniyede (döngü biterken) kendi etrafında döner */
+        }
+        /* ----------------------------------------------- */
+
         /* Giriş Menüsü Tasarımı */
         .menu-container {
             position: fixed;
@@ -71,26 +129,41 @@
 
         /* Sunum Alanı */
         .media-container {
+            position: relative;
             width: 100%;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
+            background-color: #000;
         }
+        
+        /* Slaytların Temel Durumu (Gizli ve Şeffaf) */
         .slide {
-            display: none;
+            position: absolute;
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            z-index: 1;
         }
+        
+        /* Aktif Slayt (Görünür ve Opak) */
         .slide.active {
-            display: block;
+            opacity: 1;
+            visibility: visible;
+            z-index: 2;
         }
     </style>
 </head>
 <body>
 
-<!-- GİRİŞ MENÜSÜ -->
+<div class="fixed-logo-container">
+    <img src="anasayfa.png" alt="Logo">
+</div>
+
 <div class="menu-container" id="mainMenu">
     <h1 class="menu-title">Lütfen Bir Sunum Seçin</h1>
     <div class="btn-group">
@@ -99,9 +172,7 @@
     </div>
 </div>
 
-<!-- MEDYA OYNATICI ALANI -->
 <div class="media-container" id="presentation">
-    <!-- PNG'ler (10 saniye kalacak) -->
     <img class="slide" src="1.png" alt="Slayt 1">
     <img class="slide" src="2.png" alt="Slayt 2">
     <img class="slide" src="3.png" alt="Slayt 3">
@@ -115,7 +186,6 @@
     <img class="slide" src="11.png" alt="Slayt 11">
     <img class="slide" src="12.png" alt="Slayt 12">
 
-    <!-- MP4'ler -->
     <video class="slide" src="1.mp4" muted playsinline></video>
     <video class="slide" src="2.mp4" muted playsinline></video>
 </div>
@@ -124,35 +194,36 @@
     const slides = document.querySelectorAll('.slide');
     let currentIndex = 0;
     let slideTimeout;
-    const imageDuration = 10000; // 10 saniye
+    const imageDuration = 7000; // Resimler 7 saniye kalır
 
-    // Harezmi Sunumunu Başlatan Fonksiyon
     function startHarezmi() {
-        // Menüyü ekrandan kaldır
         const menu = document.getElementById('mainMenu');
         menu.style.opacity = '0';
         setTimeout(() => {
             menu.style.display = 'none';
-            // İlk slaytı göster ve döngüyü başlat
             showSlide(0);
         }, 500); 
     }
 
     function showSlide(index) {
-        // Eski aktifi temizle
-        slides[currentIndex].classList.remove('active');
-        
-        if (slides[currentIndex].tagName === 'VIDEO') {
-            slides[currentIndex].pause();
-            slides[currentIndex].currentTime = 0;
-        }
+        clearTimeout(slideTimeout);
 
-        // Yeni slaytı aktif et
+        const previousSlide = slides[currentIndex];
+        
         currentIndex = index;
         const currentSlide = slides[currentIndex];
+        
+        if (previousSlide) previousSlide.classList.remove('active');
         currentSlide.classList.add('active');
 
-        clearTimeout(slideTimeout);
+        if (previousSlide && previousSlide.tagName === 'VIDEO' && previousSlide !== currentSlide) {
+            setTimeout(() => {
+                if (!previousSlide.classList.contains('active')) {
+                    previousSlide.pause();
+                    previousSlide.currentTime = 0;
+                }
+            }, 800);
+        }
 
         if (currentSlide.tagName === 'IMG') {
             slideTimeout = setTimeout(nextSlide, imageDuration);
@@ -168,7 +239,7 @@
     function nextSlide() {
         let nextIndex = currentIndex + 1;
         if (nextIndex >= slides.length) {
-            nextIndex = 0; // Başa dön
+            nextIndex = 0;
         }
         showSlide(nextIndex);
     }
