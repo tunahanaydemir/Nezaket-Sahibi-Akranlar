@@ -19,7 +19,7 @@
         }
         
         /* ----------------------------------------------- */
-        /* HİBRİT TV LOGO ANİMASYONU (GLINT + SUBTLE FLIP)  */
+        /* SENKRONİZE 10 SANİYELİK TV LOGO ANİMASYONU       */
         /* ----------------------------------------------- */
         .fixed-logo-container {
             position: fixed;
@@ -29,20 +29,20 @@
             height: auto;
             z-index: 9999;
             pointer-events: none;
-            overflow: hidden; /* Parlama dışarı taşmasın diye */
-            perspective: 1000px; /* 3D Dönüşün derinliği için */
+            overflow: hidden; /* Parlama dışarı taşmasın */
+            perspective: 1000px; /* 3D Dönüş derinliği */
         }
 
         .fixed-logo-container img {
             width: 100%;
             height: auto;
             display: block;
-            /* 60 Saniyelik Ana Döngü: 3D Dönüşü Kontrol Eder */
-            animation: logoFlip 60s infinite ease-in-out;
             transform-style: preserve-3d;
+            /* 10 saniyede bir döner */
+            animation: combinedFlip 10s infinite ease-in-out;
         }
 
-        /* Parlama Efekti İçin Katman */
+        /* Parlama Efekti Katmanı */
         .fixed-logo-container::before {
             content: '';
             position: absolute;
@@ -53,26 +53,25 @@
             background: linear-gradient(
                 to right, 
                 rgba(255, 255, 255, 0) 0%, 
-                rgba(255, 255, 255, 0.5) 50%, 
+                rgba(255, 255, 255, 0.6) 50%, /* Parlama netliği hafif artırıldı */
                 rgba(255, 255, 255, 0) 100%
             );
             transform: skewX(-25deg);
             z-index: 10;
-            /* 60 Saniyelik Ana Döngü: Parlamayı Kontrol Eder */
-            animation: logoGlint 60s infinite ease-in-out;
+            /* 10 saniyede bir parlar */
+            animation: combinedGlint 10s infinite ease-in-out;
         }
 
-        /* 1. SEÇENEK: 30. saniyeye doğru tetiklenen PARLAMA (GLINT) */
-        @keyframes logoGlint {
-            0%, 46% { left: -150%; } 
-            49% { left: 150%; }     /* Tam 30. saniyeye gelirken (60 saniyenin %49'u) parlama geçer */
-            50%, 100% { left: -150%; }
+        /* 10 Saniyelik Döngü: Dönme Hareketi (%85'e kadar bekler, son 1.5 sn'de döner) */
+        @keyframes combinedFlip {
+            0%, 85% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
         }
 
-        /* 2. SEÇENEK: 60. saniyeye doğru tetiklenen 3D DÖNÜŞ (FLIP) */
-        @keyframes logoFlip {
-            0%, 96% { transform: rotateY(0deg); }
-            100% { transform: rotateY(360deg); } /* Tam 60. saniyede (döngü biterken) kendi etrafında döner */
+        /* 10 Saniyelik Döngü: Aynı Anda Parlama Hareketi */
+        @keyframes combinedGlint {
+            0%, 85% { left: -150%; }
+            100% { left: 150%; }
         }
         /* ----------------------------------------------- */
 
@@ -138,7 +137,7 @@
             background-color: #000;
         }
         
-        /* Slaytların Temel Durumu (Gizli ve Şeffaf) */
+        /* Slaytların Temel Durumu */
         .slide {
             position: absolute;
             max-width: 100%;
@@ -150,7 +149,7 @@
             z-index: 1;
         }
         
-        /* Aktif Slayt (Görünür ve Opak) */
+        /* Aktif Slayt */
         .slide.active {
             opacity: 1;
             visibility: visible;
@@ -194,7 +193,7 @@
     const slides = document.querySelectorAll('.slide');
     let currentIndex = 0;
     let slideTimeout;
-    const imageDuration = 7000; // Resimler 7 saniye kalır
+    const imageDuration = 7000; // Resimler için 7 saniye kalma süresi
 
     function startHarezmi() {
         const menu = document.getElementById('mainMenu');
