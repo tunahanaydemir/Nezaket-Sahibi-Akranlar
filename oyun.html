@@ -885,69 +885,60 @@ function finishGame(){completeStation(6);}
 // ═══════════════════════════════
 // CERTIFICATE RENDER (ekran)
 // ═══════════════════════════════
+// ════════════════════════════════════════════════════════════
+// BULUTA VERİ GÖNDERME (Eski QR / PDF Yapısı Yerine)
+// ════════════════════════════════════════════════════════════
 function buildQRPayload() {
-  // Senin mevcut loading spinner elementin varsa onu açalım
   const spin = document.getElementById('loadingSpinner');
   if(spin) spin.classList.add('show');
 
-  const timestamp = Date.now();
-  
-  // Senin orijinal payload yapınla tamamen aynı verileri topluyoruz
-  const payload = {
-    type: "nesak-cert",
-    team: G.teamName,
-    members: G.members,
-    maskot: G.maskot,
-    mascotIcon: G.mascotIcon,
-    promise: G.soz,
-    date: G.date,
-    answers: G.aktiviteler || {}, // Oyun boyunca topladığın tüm cevaplar/fotoğraflar
-    savedAt: timestamp            // Admin panelinde 24 saatlik otomatik silme için gereken zaman damgası
-  };
+  try {
+    const timestamp = Date.now();
 
-  // Veritabanında "ekipler" altına "EkipAdi_ZamanDamgasi" formatında kaydediyoruz
-  const safeTeamName = G.teamName.replace(/\s+/g, '_');
-  database.ref('ekipler/' + safeTeamName + '_' + timestamp).set(payload)
-    .then(() => {
-      if(spin) spin.classList.remove('show');
-      
-      // Oyun alanını gizle, başarı ekranını aç
-      document.getElementById('screen-game').classList.remove('active');
-      
-      // Eğer projenin sonunda çocuklara konfeti patlatıyorsan fonksiyonunu çağırabilirsin
-      if(typeof spawnConfetti === "function") spawnConfetti();
-      
-      // Ekranda QR kod göstermek yerine çocuklara stanta gitmelerini söyleyen basit uyarı veriyoruz
-      alert('Tebrikler! Oyun verileriniz hakem masasına başarıyla gönderildi. Şimdi stanta giderek basılı sertifikanızı alabilirsiniz.');
-    })
-    .catch((err) => {
-      if(spin) spin.classList.remove('show');
-      console.error(err);
-      alert('Veri gönderilirken bir internet hatası oluştu, lütfen tekrar deneyin: ' + err.toString());
-    });
-}
-function generateCertQR(){
-  const img=document.getElementById('qr-cert-img');
-  const loading=document.getElementById('qr-cert-loading');
-  if(!img)return;
-  img.style.display='none';
-  loading.style.display='flex';loading.textContent='QR oluşturuluyor…';
-  const url='https://api.qrserver.com/v1/create-qr-code/?size=500x500&data='+encodeURIComponent(buildQRPayload());
-  img.onload=()=>{loading.style.display='none';img.style.display='block';};
-  img.onerror=()=>{loading.textContent='QR oluşturulamadı';};
-  img.src=url;
-}
+    // Senin admin.html paneline aktarılacak olan tüm veri paketi
+    const payload = {
+      type: "nesak-cert",
+      team: G.teamName,
+      members: G.members,
+      maskot: G.maskot,
+      mascotIcon: G.mascotIcon,
+      promise: G.soz,
+      date: G.date,
+      // İstasyonlarda biriken tüm aktiviteleri, fotoğrafları ve cevapları eksiksiz gönderiyoruz
+      aktiviteler: {
+        riddle: G.riddleAnswer || "",
+        photo: G.uploadedPhoto || null, // Base64 fotoğraf verisi
+        scen: G.selectedScenario || "",
+        scenText: G.scenarioText || ""
+      },
+      savedAt: timestamp // Admin panelinin 24 saatlik otomatik silme kontrolü için
+    };
 
-function renderCert(){
-  generateCertQR();
-  document.getElementById('cert-team-nm').textContent=G.teamName;
-  document.getElementById('cert-mascot-ic').textContent=G.mascotIcon;
-  document.getElementById('cert-mascot-nm').textContent=G.mascotName;
-  document.getElementById('cert-p-txt').textContent=G.data.promise||'—';
-  const mEl=document.getElementById('cert-members');mEl.innerHTML='';
-  G.members.forEach(m=>{const t=document.createElement('div');t.className='cert-mem';t.textContent=m;mEl.appendChild(t);});
-  const now=new Date();
-  document.getElementById('cert-date').textContent=now.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+    // Firebase Realtime Database'e "ekipler/Ekip_Adi_ZamanDamgasi" olarak yazıyoruz
+    // Ekip adındaki boşlukları sorun çıkarmaması için alt tireye çeviriyoruz
+    const safeTeamName = (G.teamName || "isimsiz_ekip").replace(/\s+/g, '_');
+    
+    database.ref('ekipler/' + safeTeamName + '_' + timestamp).set(payload)
+      .then(() => {
+        if(spin) spin.classList.remove('show');
+
+        // Mevcut ekranı gizle ve çocuklara konfeti patlatarak başarı ekranını göster
+        document.getElementById('screen-game').classList.remove('active');
+        document.getElementById('screen-finish').classList.add('active');
+        
+        if(typeof spawnConfetti === "function") spawnConfetti();
+      })
+      .catch((err) => {
+        if(spin) spin.classList.remove('show');
+        console.error("Firebase kayıt hatası:", err);
+        alert('Veriler sunucuya gönderilirken bir bağlantı hatası oluştu: ' + (err.message || err.toString()));
+      });
+
+  } catch(err) {
+    if(spin) spin.classList.remove('show');
+    console.error("Payload hazırlama hatası:", err);
+    alert('Veri paketi hazırlanırken bir hata oluştu.');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
