@@ -14,87 +14,36 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #1a0f05;
+            background-color: #000;
             font-family: sans-serif;
         }
-
-        /* =============================================
-           ANA ÇERÇEVE YAPISI
-           ============================================= */
-
-        /* Tüm ekranı kaplayan çerçeve wrapper */
-        .frame-wrapper {
+        
+        /* ----------------------------------------------- */
+        /* SENKRONİZE 10 SANİYELİK TV LOGO ANİMASYONU       */
+        /* ----------------------------------------------- */
+        .fixed-logo-container {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 25px;
+            left: 25px;
+            width: 120px;
+            height: auto;
+            z-index: 9999;
             pointer-events: none;
-            z-index: 100;
+            overflow: hidden; /* Parlama dışarı taşmasın */
+            perspective: 1000px; /* 3D Dönüş derinliği */
         }
 
-        /* Koyu kahverengi çerçeve - SVG ile çizilecek,
-           ortası şeffaf kalacak (sunum görünsün diye) */
-        .frame-svg {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-        }
-
-        /* =============================================
-           LOGO YUVASI - Çerçevenin alt orta çıkıntısı
-           ============================================= */
-        .logo-notch {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 160px;
-            height: 90px;
-            /* Çerçeve renginde arka plan */
-            background: linear-gradient(180deg, #4a2c0e 0%, #2e1a08 60%, #1e1005 100%);
-            /* Üst köşeler yuvarlatılmış, alta düz (çerçeveye gömülü) */
-            border-radius: 18px 18px 0 0;
-            /* Çerçeve kenar çizgisi */
-            border: 3px solid #7a4e22;
-            border-bottom: none;
-            /* Logo içinde ortalansın */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Parlama ve dönüş animasyonu için clip */
-            overflow: hidden;
-            /* SVG'nin üstüne çıksın */
-            z-index: 200;
-            pointer-events: none;
-            /* İçten glow efekti - lüks görünüm */
-            box-shadow:
-                inset 0 2px 8px rgba(0,0,0,0.6),
-                0 0 0 1px #3a1e06,
-                0 -4px 20px rgba(100, 60, 10, 0.4);
-        }
-
-        /* Yuvanın üst kenarındaki altın şerit */
-        .logo-notch::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #c8860a, #f0c040, #c8860a, transparent);
-            border-radius: 18px 18px 0 0;
-        }
-
-        /* =============================================
-           LOGO ANİMASYONLARI (orijinalden taşındı)
-           ============================================= */
-        .logo-notch img {
-            width: 110px;
+        .fixed-logo-container img {
+            width: 100%;
             height: auto;
             display: block;
             transform-style: preserve-3d;
+            /* 10 saniyede bir döner */
             animation: combinedFlip 10s infinite ease-in-out;
         }
 
-        /* Parlama efekti */
-        .logo-notch .glint {
+        /* Parlama Efekti Katmanı */
+        .fixed-logo-container::before {
             content: '';
             position: absolute;
             top: 0;
@@ -102,40 +51,43 @@
             width: 50%;
             height: 100%;
             background: linear-gradient(
-                to right,
-                rgba(255,255,255,0) 0%,
-                rgba(255,255,255,0.6) 50%,
-                rgba(255,255,255,0) 100%
+                to right, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.6) 50%, /* Parlama netliği hafif artırıldı */
+                rgba(255, 255, 255, 0) 100%
             );
             transform: skewX(-25deg);
             z-index: 10;
+            /* 10 saniyede bir parlar */
             animation: combinedGlint 10s infinite ease-in-out;
-            pointer-events: none;
         }
 
+        /* 10 Saniyelik Döngü: Dönme Hareketi (%85'e kadar bekler, son 1.5 sn'de döner) */
         @keyframes combinedFlip {
             0%, 85% { transform: rotateY(0deg); }
-            100%     { transform: rotateY(360deg); }
+            100% { transform: rotateY(360deg); }
         }
 
+        /* 10 Saniyelik Döngü: Aynı Anda Parlama Hareketi */
         @keyframes combinedGlint {
             0%, 85% { left: -150%; }
-            100%     { left: 150%; }
+            100% { left: 150%; }
         }
+        /* ----------------------------------------------- */
 
-        /* =============================================
-           GİRİŞ MENÜSÜ
-           ============================================= */
+        /* Giriş Menüsü Tasarımı */
         .menu-container {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-color: #111;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 50;
+            z-index: 10;
             transition: opacity 0.5s ease;
         }
         .menu-title {
@@ -157,15 +109,16 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
+        /* Aktif Buton (Harezmi) */
         .btn-harezmi {
             background-color: #00adb5;
             color: #fff;
-            pointer-events: all;
         }
         .btn-harezmi:hover {
             background-color: #007a80;
             transform: scale(1.05);
         }
+        /* Pasif Buton (Okul) */
         .btn-okul {
             background-color: #444;
             color: #888;
@@ -173,31 +126,18 @@
             opacity: 0.6;
         }
 
-        /* =============================================
-           SUNUM ALANI
-           ============================================= */
+        /* Sunum Alanı */
         .media-container {
             position: relative;
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
             background-color: #000;
         }
-
-        /* Slaytların görüntülendiği iç alan — çerçeve kalınlığı kadar padding */
-        .slides-inner {
-            position: absolute;
-            /* Çerçeve kalınlığına göre iç boşluk: üst/yan 18px, alt 75px (logo yuvası için) */
-            top: 18px;
-            left: 18px;
-            right: 18px;
-            bottom: 18px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
+        
+        /* Slaytların Temel Durumu */
         .slide {
             position: absolute;
             max-width: 100%;
@@ -208,6 +148,8 @@
             transition: opacity 0.8s ease, visibility 0.8s ease;
             z-index: 1;
         }
+        
+        /* Aktif Slayt */
         .slide.active {
             opacity: 1;
             visibility: visible;
@@ -217,98 +159,10 @@
 </head>
 <body>
 
-<!-- SUNUM ALANI (arka planda) -->
-<div class="media-container" id="presentation">
-    <div class="slides-inner">
-        <img class="slide" src="1.png"  alt="Slayt 1">
-        <img class="slide" src="2.png"  alt="Slayt 2">
-        <img class="slide" src="3.png"  alt="Slayt 3">
-        <img class="slide" src="4.png"  alt="Slayt 4">
-        <img class="slide" src="5.png"  alt="Slayt 5">
-        <img class="slide" src="6.png"  alt="Slayt 6">
-        <img class="slide" src="7.png"  alt="Slayt 7">
-        <img class="slide" src="8.png"  alt="Slayt 8">
-        <img class="slide" src="9.png"  alt="Slayt 9">
-        <img class="slide" src="10.png" alt="Slayt 10">
-        <img class="slide" src="11.png" alt="Slayt 11">
-        <img class="slide" src="12.png" alt="Slayt 12">
-        <video class="slide" src="1.mp4" muted playsinline></video>
-        <video class="slide" src="2.mp4" muted playsinline></video>
-    </div>
+<div class="fixed-logo-container">
+    <img src="anasayfa.png" alt="Logo">
 </div>
 
-<!-- ÇERÇEVE (üstte, SVG ile ortası boş kahverengi çerçeve) -->
-<div class="frame-wrapper">
-    <svg class="frame-svg" xmlns="http://www.w3.org/2000/svg" id="frameSvg">
-        <!--
-            clip-path hilesi: tam ekran dikdörtgen çiz, ortasını (sunum alanını) kes.
-            Böylece çerçeve katmanı sunum görüntüsünü kapatmaz.
-        -->
-        <defs>
-            <clipPath id="frameClip">
-                <rect id="outerRect" x="0" y="0" width="100%" height="100%"/>
-                <!-- İç boşluk (sunum alanı) JS ile boyutlandırılacak -->
-                <rect id="innerRect" x="18" y="18" width="100" height="100" rx="4"/>
-            </clipPath>
-
-            <!-- Çerçeve dokusu için gradient -->
-            <linearGradient id="frameGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stop-color="#5c3418"/>
-                <stop offset="40%"  stop-color="#3b2010"/>
-                <stop offset="100%" stop-color="#1e0f04"/>
-            </linearGradient>
-            <linearGradient id="frameGradH" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%"   stop-color="#5c3418"/>
-                <stop offset="50%"  stop-color="#3b2010"/>
-                <stop offset="100%" stop-color="#5c3418"/>
-            </linearGradient>
-
-            <!-- Altın kenar çizgisi gradient -->
-            <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%"   stop-color="#6b3d0a" stop-opacity="0"/>
-                <stop offset="20%"  stop-color="#c8860a"/>
-                <stop offset="50%"  stop-color="#f0c040"/>
-                <stop offset="80%"  stop-color="#c8860a"/>
-                <stop offset="100%" stop-color="#6b3d0a" stop-opacity="0"/>
-            </linearGradient>
-        </defs>
-
-        <!-- Çerçeve dolgusu (clip ile ortası boş) -->
-        <rect id="frameRect" x="0" y="0" width="100%" height="100%"
-              fill="url(#frameGrad)" clip-path="url(#frameClip)"/>
-
-        <!-- İç kenar altın çizgisi - üst -->
-        <line id="goldTop" x1="18" y1="18" x2="100%" y2="18" stroke="url(#goldGrad)" stroke-width="1.5"/>
-        <!-- İç kenar altın çizgisi - sol -->
-        <line id="goldLeft" x1="18" y1="18" x2="18" y2="100%" stroke="#c8860a" stroke-width="1" stroke-opacity="0.5"/>
-        <!-- İç kenar altın çizgisi - sağ -->
-        <line id="goldRight" x1="100%" y1="18" x2="100%" y2="100%" stroke="#c8860a" stroke-width="1" stroke-opacity="0.5"/>
-
-        <!-- Dış kenar ince çizgi -->
-        <rect x="1" y="1" width="calc(100% - 2px)" height="calc(100% - 2px)"
-              fill="none" stroke="#7a4e22" stroke-width="1.5" rx="2"/>
-
-        <!-- Köşe süsleri -->
-        <!-- Sol Üst -->
-        <g stroke="#c8860a" stroke-width="1.5" fill="none" opacity="0.8">
-            <line x1="18" y1="40" x2="18" y2="18"/><line x1="18" y1="18" x2="40" y2="18"/>
-            <line x1="22" y1="44" x2="22" y2="22"/><line x1="22" y1="22" x2="44" y2="22"/>
-        </g>
-        <!-- Sağ Üst -->
-        <g stroke="#c8860a" stroke-width="1.5" fill="none" opacity="0.8">
-            <line id="rtl1" x1="0" y1="40" x2="0" y2="18"/><line id="rtl2" x1="0" y1="18" x2="-22" y2="18"/>
-            <line id="rtl3" x1="-4" y1="44" x2="-4" y2="22"/><line id="rtl4" x1="-4" y1="22" x2="-26" y2="22"/>
-        </g>
-    </svg>
-
-    <!-- LOGO YUVASI -->
-    <div class="logo-notch" id="logoNotch">
-        <img src="anasayfa.png" alt="Logo">
-        <div class="glint"></div>
-    </div>
-</div>
-
-<!-- GİRİŞ MENÜSÜ -->
 <div class="menu-container" id="mainMenu">
     <h1 class="menu-title">Lütfen Bir Sunum Seçin</h1>
     <div class="btn-group">
@@ -317,55 +171,29 @@
     </div>
 </div>
 
-<script>
-    /* ── Çerçeve: SVG clip inner rect'i ekran boyutuna göre ayarla ── */
-    function resizeFrame() {
-        const W = window.innerWidth;
-        const H = window.innerHeight;
-        const pad = 18;
-        const bottomPad = 75; /* logo yuvası için ekstra boşluk */
-        const inner = document.getElementById('innerRect');
-        if (inner) {
-            inner.setAttribute('x', pad);
-            inner.setAttribute('y', pad);
-            inner.setAttribute('width',  W - pad * 2);
-            inner.setAttribute('height', H - pad - bottomPad);
-        }
-        /* Slayt alanı da aynı şekilde */
-        const si = document.querySelector('.slides-inner');
-        if (si) {
-            si.style.bottom = (bottomPad) + 'px';
-        }
-        /* Sağ üst köşe süsleri (SVG'de % kullanamadığımız için JS ile) */
-        const rtl1 = document.getElementById('rtl1');
-        const rtl2 = document.getElementById('rtl2');
-        const rtl3 = document.getElementById('rtl3');
-        const rtl4 = document.getElementById('rtl4');
-        if (rtl1) {
-            rtl1.setAttribute('x1', W - 18); rtl1.setAttribute('x2', W - 18);
-            rtl1.setAttribute('y1', 40);      rtl1.setAttribute('y2', 18);
-            rtl2.setAttribute('x1', W - 18); rtl2.setAttribute('x2', W - 40);
-            rtl2.setAttribute('y1', 18);      rtl2.setAttribute('y2', 18);
-            rtl3.setAttribute('x1', W - 22); rtl3.setAttribute('x2', W - 22);
-            rtl3.setAttribute('y1', 44);      rtl3.setAttribute('y2', 22);
-            rtl4.setAttribute('x1', W - 22); rtl4.setAttribute('x2', W - 44);
-            rtl4.setAttribute('y1', 22);      rtl4.setAttribute('y2', 22);
-        }
-        const goldTop  = document.getElementById('goldTop');
-        const goldLeft = document.getElementById('goldLeft');
-        const goldRight= document.getElementById('goldRight');
-        if (goldTop)  { goldTop.setAttribute('x2', W - 18); }
-        if (goldLeft) { goldLeft.setAttribute('y2', H - 75); }
-        if (goldRight){ goldRight.setAttribute('x1', W - 18); goldRight.setAttribute('x2', W - 18); goldRight.setAttribute('y2', H - 75); }
-    }
-    window.addEventListener('resize', resizeFrame);
-    resizeFrame();
+<div class="media-container" id="presentation">
+    <img class="slide" src="1.png" alt="Slayt 1">
+    <img class="slide" src="2.png" alt="Slayt 2">
+    <img class="slide" src="3.png" alt="Slayt 3">
+    <img class="slide" src="4.png" alt="Slayt 4">
+    <img class="slide" src="5.png" alt="Slayt 5">
+    <img class="slide" src="6.png" alt="Slayt 6">
+    <img class="slide" src="7.png" alt="Slayt 7">
+    <img class="slide" src="8.png" alt="Slayt 8">
+    <img class="slide" src="9.png" alt="Slayt 9">
+    <img class="slide" src="10.png" alt="Slayt 10">
+    <img class="slide" src="11.png" alt="Slayt 11">
+    <img class="slide" src="12.png" alt="Slayt 12">
 
-    /* ── Slayt Sistemi ── */
+    <video class="slide" src="1.mp4" muted playsinline></video>
+    <video class="slide" src="2.mp4" muted playsinline></video>
+</div>
+
+<script>
     const slides = document.querySelectorAll('.slide');
     let currentIndex = 0;
     let slideTimeout;
-    const imageDuration = 7000;
+    const imageDuration = 7000; // Resimler için 7 saniye kalma süresi
 
     function startHarezmi() {
         const menu = document.getElementById('mainMenu');
@@ -373,16 +201,20 @@
         setTimeout(() => {
             menu.style.display = 'none';
             showSlide(0);
-        }, 500);
+        }, 500); 
     }
 
     function showSlide(index) {
         clearTimeout(slideTimeout);
+
         const previousSlide = slides[currentIndex];
+        
         currentIndex = index;
         const currentSlide = slides[currentIndex];
+        
         if (previousSlide) previousSlide.classList.remove('active');
         currentSlide.classList.add('active');
+
         if (previousSlide && previousSlide.tagName === 'VIDEO' && previousSlide !== currentSlide) {
             setTimeout(() => {
                 if (!previousSlide.classList.contains('active')) {
@@ -391,19 +223,26 @@
                 }
             }, 800);
         }
+
         if (currentSlide.tagName === 'IMG') {
             slideTimeout = setTimeout(nextSlide, imageDuration);
         } else if (currentSlide.tagName === 'VIDEO') {
-            currentSlide.play().catch(() => nextSlide());
+            currentSlide.play().catch(error => {
+                console.log("Video oynatılamadı, geçiliyor...", error);
+                nextSlide();
+            });
             currentSlide.addEventListener('ended', nextSlide, { once: true });
         }
     }
 
     function nextSlide() {
         let nextIndex = currentIndex + 1;
-        if (nextIndex >= slides.length) nextIndex = 0;
+        if (nextIndex >= slides.length) {
+            nextIndex = 0;
+        }
         showSlide(nextIndex);
     }
 </script>
+
 </body>
 </html>
