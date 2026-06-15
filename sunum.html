@@ -28,20 +28,20 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: #1a0f00;
+            background-color: #020e10;
             z-index: 0;
         }
 
-        /* Dış kahverengi çerçeve */
+        /* Dış turkuaz çerçeve */
         .outer-frame {
             position: relative;
             width: calc(100% - 48px);
             height: calc(100% - 80px); /* alt kısımda logo yuvası için boşluk */
-            border: 10px solid #5c3a1e;
+            border: 10px solid #00565e;
             border-radius: 8px;
             box-shadow:
-                0 0 0 3px #8b5e3c,
-                0 0 0 6px #3d2410,
+                0 0 0 3px #007d88,
+                0 0 0 6px #002f35,
                 inset 0 0 30px rgba(0,0,0,0.6),
                 0 8px 40px rgba(0,0,0,0.8);
             background: #000;
@@ -56,7 +56,7 @@
             position: absolute;
             width: 20px;
             height: 20px;
-            border-color: #c8922a;
+            border-color: #00d4e0;
             border-style: solid;
         }
         .outer-frame::before {
@@ -75,7 +75,7 @@
             position: absolute;
             width: 20px;
             height: 20px;
-            border-color: #c8922a;
+            border-color: #00d4e0;
             border-style: solid;
         }
         .corner-tr {
@@ -150,12 +150,12 @@
             overflow: hidden;
             perspective: 1000px;
             /* Daire şeklinde arka plan */
-            background: radial-gradient(circle, #2a1505 60%, #1a0f00 100%);
+            background: radial-gradient(circle, #041c20 60%, #020e10 100%);
             border-radius: 50%;
             padding: 12px;
-            border: 3px solid #8b5e3c;
+            border: 3px solid #007d88;
             box-shadow:
-                0 0 0 2px #5c3a1e,
+                0 0 0 2px #00565e,
                 0 4px 20px rgba(0,0,0,0.9),
                 inset 0 2px 8px rgba(0,0,0,0.5);
             width: 110px;
@@ -267,13 +267,11 @@
         /* Slayt stilleri */
         .slide {
             position: absolute;
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.8s ease, visibility 0.8s ease;
             z-index: 1;
+            /* Boyut JS tarafından ayarlanır */
         }
         .slide.active {
             opacity: 1;
@@ -320,9 +318,9 @@
         <svg class="logo-arms" viewBox="0 0 200 55" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
             <!-- Sol kol: çerçeve kenarından logo yuvasına -->
             <path d="M 0 8 L 42 8 Q 50 8 55 16 L 60 30 Q 63 38 70 42 A 30 30 0 0 0 100 52 A 30 30 0 0 0 130 42 Q 137 38 140 30 L 145 16 Q 150 8 158 8 L 200 8"
-                  stroke="#8b5e3c" stroke-width="3" fill="none"/>
+                  stroke="#007d88" stroke-width="3" fill="none"/>
             <path d="M 0 8 L 42 8 Q 50 8 55 16 L 60 30 Q 63 38 70 42 A 30 30 0 0 0 100 52 A 30 30 0 0 0 130 42 Q 137 38 140 30 L 145 16 Q 150 8 158 8 L 200 8"
-                  stroke="#c8922a" stroke-width="1" fill="none" opacity="0.5"/>
+                  stroke="#00d4e0" stroke-width="1" fill="none" opacity="0.5"/>
         </svg>
 
         <!-- Logo (yuva içinde) -->
@@ -337,6 +335,59 @@
     let currentIndex = 0;
     let slideTimeout;
     const imageDuration = 7000;
+
+    // Slaytı çerçeveye tam sığdır (hiç boşluk kalmaz, içerik de kesilmez)
+    // Mantık: çerçevenin en-boy oranı ile slaytın oranını karşılaştır,
+    // hangisi daha "geniş" ise genişliği çerçeveye sabitle, diğerinde yüksekliği sabitle.
+    function fitSlide(el, naturalW, naturalH) {
+        const container = document.getElementById('presentation');
+        const cw = container.clientWidth;
+        const ch = container.clientHeight;
+
+        const containerRatio = cw / ch;
+        const slideRatio = naturalW / naturalH;
+
+        let w, h;
+        if (slideRatio > containerRatio) {
+            // Slayt daha geniş → yüksekliği tam doldur, genişlik taşar → kırp
+            h = ch;
+            w = ch * slideRatio;
+        } else {
+            // Slayt daha uzun → genişliği tam doldur, yükseklik taşar → kırp
+            w = cw;
+            h = cw / slideRatio;
+        }
+
+        el.style.width  = w + 'px';
+        el.style.height = h + 'px';
+        el.style.top    = ((ch - h) / 2) + 'px';
+        el.style.left   = ((cw - w) / 2) + 'px';
+    }
+
+    // Tüm resimlerin doğal boyutunu önceden yükle ve kaydet
+    slides.forEach(el => {
+        if (el.tagName === 'IMG') {
+            const tmp = new Image();
+            tmp.onload = () => {
+                el._nw = tmp.naturalWidth;
+                el._nh = tmp.naturalHeight;
+                if (el.classList.contains('active')) fitSlide(el, el._nw, el._nh);
+            };
+            tmp.src = el.src;
+        } else if (el.tagName === 'VIDEO') {
+            el.addEventListener('loadedmetadata', () => {
+                el._nw = el.videoWidth;
+                el._nh = el.videoHeight;
+                if (el.classList.contains('active')) fitSlide(el, el._nw, el._nh);
+            });
+        }
+    });
+
+    // Ekran boyutu değişince tüm aktif slaytı yeniden ölçekle
+    window.addEventListener('resize', () => {
+        const active = document.querySelector('.slide.active');
+        if (active && active._nw) fitSlide(active, active._nw, active._nh);
+    });
 
     function startHarezmi() {
         const menu = document.getElementById('mainMenu');
@@ -354,6 +405,10 @@
         const currentSlide = slides[currentIndex];
         if (previousSlide) previousSlide.classList.remove('active');
         currentSlide.classList.add('active');
+
+        // Boyut bilgisi hazırsa hemen fit et
+        if (currentSlide._nw) fitSlide(currentSlide, currentSlide._nw, currentSlide._nh);
+
         if (previousSlide && previousSlide.tagName === 'VIDEO' && previousSlide !== currentSlide) {
             setTimeout(() => {
                 if (!previousSlide.classList.contains('active')) {
