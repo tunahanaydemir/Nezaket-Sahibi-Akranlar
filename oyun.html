@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Nezaket Sahibi Akranlar</title>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -562,6 +563,19 @@ textarea{resize:vertical;min-height:84px}
   window.cycleTheme=function(){mode=(mode==='dark')?'light':'dark';applyTheme(mode);};
 })();
 
+  // Firebase Ayarları (Kendi veritabanı bilgilerini buraya yazacaksın)
+const firebaseConfig = {
+  apiKey: "AIzaSyYOUR_ACTUAL_API_KEY",
+  authDomain: "nesak-project.firebaseapp.com",
+  databaseURL: "https://nesak-project-default-rtdb.firebaseio.com",
+  projectId: "nesak-project",
+  storageBucket: "nesak-project.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:1234567:web:abcde"
+};
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+  
 // ═══════════════════════════════
 // STATE
 // ═══════════════════════════════
@@ -871,23 +885,46 @@ function finishGame(){completeStation(6);}
 // ═══════════════════════════════
 // CERTIFICATE RENDER (ekran)
 // ═══════════════════════════════
-function buildQRPayload(){
-  const dateStr=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
-  return JSON.stringify({
-    type:'nesak-cert',
-    version:'v4',
-    team:G.teamName,
-    members:G.members,
-    mascot:G.mascotName||'',
-    mascotIcon:G.mascotIcon||'',
-    promise:G.data.promise||'',
-    riddle:G.data.riddle||'',
-    cipher:G.data.cipher||'',
-    scenario:G.data.scenario||'',
-    score:G.done.length,
-    date:dateStr,
-    certText:`${dateStr} tarihinde düzenlenen NESAK Oryantiring Etkinliği'ne başarıyla katılım sağlayan ${G.teamName} ekibine teşekkür ederiz.`
-  });
+function buildQRPayload() {
+  // Senin mevcut loading spinner elementin varsa onu açalım
+  const spin = document.getElementById('loadingSpinner');
+  if(spin) spin.classList.add('show');
+
+  const timestamp = Date.now();
+  
+  // Senin orijinal payload yapınla tamamen aynı verileri topluyoruz
+  const payload = {
+    type: "nesak-cert",
+    team: G.teamName,
+    members: G.members,
+    maskot: G.maskot,
+    mascotIcon: G.mascotIcon,
+    promise: G.soz,
+    date: G.date,
+    answers: G.aktiviteler || {}, // Oyun boyunca topladığın tüm cevaplar/fotoğraflar
+    savedAt: timestamp            // Admin panelinde 24 saatlik otomatik silme için gereken zaman damgası
+  };
+
+  // Veritabanında "ekipler" altına "EkipAdi_ZamanDamgasi" formatında kaydediyoruz
+  const safeTeamName = G.teamName.replace(/\s+/g, '_');
+  database.ref('ekipler/' + safeTeamName + '_' + timestamp).set(payload)
+    .then(() => {
+      if(spin) spin.classList.remove('show');
+      
+      // Oyun alanını gizle, başarı ekranını aç
+      document.getElementById('screen-game').classList.remove('active');
+      
+      // Eğer projenin sonunda çocuklara konfeti patlatıyorsan fonksiyonunu çağırabilirsin
+      if(typeof spawnConfetti === "function") spawnConfetti();
+      
+      // Ekranda QR kod göstermek yerine çocuklara stanta gitmelerini söyleyen basit uyarı veriyoruz
+      alert('Tebrikler! Oyun verileriniz hakem masasına başarıyla gönderildi. Şimdi stanta giderek basılı sertifikanızı alabilirsiniz.');
+    })
+    .catch((err) => {
+      if(spin) spin.classList.remove('show');
+      console.error(err);
+      alert('Veri gönderilirken bir internet hatası oluştu, lütfen tekrar deneyin: ' + err.toString());
+    });
 }
 function generateCertQR(){
   const img=document.getElementById('qr-cert-img');
